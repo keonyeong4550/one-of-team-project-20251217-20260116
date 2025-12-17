@@ -47,8 +47,7 @@
 - 발표/제출 시 리스크 최소화
 ---
 # 2. 개발문서표준체계
-|:----:|
-|<img width="2481" height="3508" alt="Image" src="https://github.com/user-attachments/assets/2c8a2722-9250-47c7-bc65-0d134ddcd4c4" />|
+<img width="2481" height="3508" alt="Image" src="https://github.com/user-attachments/assets/2c8a2722-9250-47c7-bc65-0d134ddcd4c4" />
 ---
 # 3. 화면설계서 제작(2025-12-18-2025-12-19)
 
