@@ -69,3 +69,7 @@
 ---
 # 4. 시스템 아키텍쳐(2025-12-18)
 <img width="1040" height="720" alt="Image" src="https://github.com/user-attachments/assets/8fdbd6dc-7f0e-40f2-ba95-669d6b53cb87" />
+
+---
+# 5. DB 설계서 중 담당 파일업로드 테이블정의서
+<img width="3508" height="2481" alt="Image" src="https://github.com/user-attachments/assets/2539ac85-ca60-4118-b2de-cf3aa6eeee81" />
