@@ -1,6 +1,6 @@
 # one-of-team-project-20251217-20260116
 ---
-# 1.프로젝트 개발 방식 정리
+# 1. 프로젝트 개발 방식 정리
 ## 가. AS-IS (현재 개발 방식 분석)
 ### 개발 방식 요약
 - **하이브리드 방식** (애자일 + 워터폴 혼합)
@@ -50,7 +50,7 @@
 <img width="2481" height="3508" alt="Image" src="https://github.com/user-attachments/assets/2c8a2722-9250-47c7-bc65-0d134ddcd4c4" />
 
 ---
-# 3. 화면설계서 제작(2025-12-18-2025-12-19)
+# 3. 화면 설계서(2025-12-18-2025-12-19)
 ![Image](https://github.com/user-attachments/assets/355d9050-54f8-416b-833a-6c9a78f7d028)
 ![Image](https://github.com/user-attachments/assets/c62eb678-e948-471e-8126-cca43d395a41)
 ![Image](https://github.com/user-attachments/assets/fcfa2919-0c2d-40de-8df9-c4a107ba41bd)
@@ -66,3 +66,6 @@
 ![Image](https://github.com/user-attachments/assets/ee440156-d576-45dd-8ccc-ee7f6e61c17e)
 ![Image](https://github.com/user-attachments/assets/c2db339f-0efd-4fcb-acca-929083bf6c8e)
 ![Image](https://github.com/user-attachments/assets/4c3a83f7-dc08-4348-a681-e1764652b6ac)
+---
+# 4. 시스템 아키텍쳐(2025-12-18)
+<img width="1040" height="720" alt="Image" src="https://github.com/user-attachments/assets/8fdbd6dc-7f0e-40f2-ba95-669d6b53cb87" />
