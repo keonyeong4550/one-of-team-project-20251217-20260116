@@ -1,0 +1,35 @@
+import axios from "axios";
+import jwtAxios from "../util/jwtUtil";
+
+export const API_SERVER_HOST = "http://localhost:8080";
+
+const host = `${API_SERVER_HOST}/api/member`;
+
+// /login API를 호출해서 로그인 처리, 성공 시 서버에서 보내주는 JWT 토큰, 사용자 정보를 받음
+// 서버에서는 컨트롤러 없이도 Spring Security Filter Chain이 요청을 가로챔(config.loginPage()루트와 동일) - loadUserByUsername 실행
+export const loginPost = async (loginParam) => {
+  const header = { headers: { "Content-Type": "x-www-form-urlencoded" } };
+
+  const form = new FormData();
+  form.append("username", loginParam.email);
+  form.append("password", loginParam.pw);
+
+  const res = await axios.post(`${host}/login`, form, header);
+
+  return res.data;
+};
+
+export const modifyMember = async (member) => {
+  const res = await jwtAxios.put(`${host}/modify`, member);
+
+  return res.data;
+};
+
+export const joinPost = async (joinParam) => {
+  const header = { headers: { "Content-Type": "application/json" } };
+
+  // JSON 형태로 전송
+  const res = await axios.post(`${host}/join`, joinParam, header);
+
+  return res.data;
+};
