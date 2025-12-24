@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import TicketComponent from '../../components/ticket/TicketComponent';
 import { getSentTickets, getReceivedTickets, getAllTickets } from '../../api/ticketApi';
-import BasicMenu from "../../components/menu/BasicMenu";
+
 
 const TicketPage = () => {
     const loginState = useSelector((state) => state.loginSlice);
@@ -75,7 +75,6 @@ const fetchData = useCallback(async () => {
 
     return (
         <div className="container mx-auto p-6">
-            <BasicMenu />
             <h1 className="text-2xl font-black mb-8">티켓 함</h1>
 
             {/* 검색 및 필터 UI */}
