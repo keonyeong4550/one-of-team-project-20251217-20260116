@@ -22,7 +22,7 @@ public class BoardSearchImpl extends QuerydslRepositorySupport implements BoardS
     // [선생님 체크] 리턴 타입을 Page<Board>에서 Page<Object[]>로 꼭 바꿔야 합니다!
     @Override
     public Page<Object[]> search1(PageRequestDTO pageRequestDTO) {
-        
+
         QBoard board = QBoard.board;
         QReply reply = QReply.reply; // 댓글 Q파일 선언
 
@@ -33,9 +33,9 @@ public class BoardSearchImpl extends QuerydslRepositorySupport implements BoardS
         query.leftJoin(reply).on(reply.board.eq(board));
 
         // 키워드 검색 로직 (기존 유지)
-        if (pageRequestDTO.getType() != null && 
-            pageRequestDTO.getKeyword() != null && 
-            !pageRequestDTO.getKeyword().trim().isEmpty()) {
+        if (pageRequestDTO.getType() != null &&
+                pageRequestDTO.getKeyword() != null &&
+                !pageRequestDTO.getKeyword().trim().isEmpty()) {
 
             String[] typeArray = pageRequestDTO.getType().split("");
             String keyword = pageRequestDTO.getKeyword();
@@ -52,10 +52,10 @@ public class BoardSearchImpl extends QuerydslRepositorySupport implements BoardS
         }
 
         // 카테고리 필터링 (기존 유지)
-        if (pageRequestDTO.getCategory() != null && 
-            !pageRequestDTO.getCategory().trim().isEmpty() &&
-            !pageRequestDTO.getCategory().equals("전체")) {
-            
+        if (pageRequestDTO.getCategory() != null &&
+                !pageRequestDTO.getCategory().trim().isEmpty() &&
+                !pageRequestDTO.getCategory().equals("전체")) {
+
             query.where(board.category.eq(pageRequestDTO.getCategory()));
         }
 
@@ -72,7 +72,7 @@ public class BoardSearchImpl extends QuerydslRepositorySupport implements BoardS
 
         // 4. [핵심] select 부분에서 '게시글'과 '댓글 개수(count)'를 함께 뽑아냅니다.
         JPQLQuery<Tuple> tupleQuery = query.select(board, reply.count());
-        
+
         List<Tuple> tupleList = tupleQuery.fetch();
         long count = tupleQuery.fetchCount();
 
