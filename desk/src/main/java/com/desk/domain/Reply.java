@@ -8,6 +8,7 @@
      @Index(name = "idx_reply_board_bno", columnList = "board_bno")
  })
  @Getter
+ @Setter
  @Builder
  @AllArgsConstructor
  @NoArgsConstructor
