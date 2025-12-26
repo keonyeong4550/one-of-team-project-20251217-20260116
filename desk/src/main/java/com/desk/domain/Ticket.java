@@ -11,7 +11,7 @@ import java.util.List;
 @Entity
 @Table(name = "ticket")
 @Getter
-@ToString(exclude = "personalList")
+@ToString(exclude = {"personalList","documentList"})
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
@@ -82,5 +82,35 @@ public class Ticket {
         }
         personalList.clear();
     }
+
+    // 건영 S
+
+    @ElementCollection
+    @Builder.Default
+    private List<UploadTicketFile> documentList = new ArrayList<>();
+
+    public void addDocument(UploadTicketFile file) {
+        file.setOrd(this.documentList.size());
+        this.documentList.add(file);
+    }
+
+    // 필요하면 이렇게 "메타 직접 생성"용 오버로드도 제공
+    public void addDocumentMeta(String uuid, String originalName, String ext, String savedName, long size, boolean image) {
+        UploadTicketFile f = UploadTicketFile.builder()
+                .uuid(uuid)
+                .originalName(originalName)
+                .ext(ext)
+                .savedName(savedName)
+                .size(size)
+                .image(image)
+                .build();
+        addDocument(f);
+    }
+
+    public void clearList() {
+        this.documentList.clear();
+    }
+
+// 건영 E
 
 }

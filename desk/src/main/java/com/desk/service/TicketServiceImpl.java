@@ -3,15 +3,20 @@ package com.desk.service;
 import com.desk.domain.Member;
 import com.desk.domain.Ticket;
 import com.desk.domain.TicketPersonal;
+import com.desk.domain.UploadTicketFile;
 import com.desk.dto.*;
 import com.desk.repository.MemberRepository;
 import com.desk.repository.TicketRepository;
+import com.desk.util.CustomFileUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -21,9 +26,11 @@ public class TicketServiceImpl implements TicketService {
 
     private final TicketRepository ticketRepository;
     private final MemberRepository memberRepository;
+    private final CustomFileUtil fileUtil;
 
     @Override
-    public TicketSentListDTO create(TicketCreateDTO req, String writer) {
+    public TicketSentListDTO create(TicketCreateDTO req, String writer
+            , List<MultipartFile> files ) {
         // writer email로 Member 조회
         Member writerMember = memberRepository.findById(writer)
                 .orElseThrow(() -> new IllegalArgumentException("Writer not found: " + writer));
@@ -139,4 +146,70 @@ public class TicketServiceImpl implements TicketService {
                 )
                 .build();
     }
+
+
+    @Override
+    public TicketCreateDTO get(Long tno) {
+
+        Optional<Ticket> result = ticketRepository.selectOne(tno);
+
+        Ticket ticket = result.orElseThrow();
+
+        TicketCreateDTO ticketCreateDTO = entityToDTO(ticket);
+
+        return ticketCreateDTO;
+
+    }
+
+    private TicketCreateDTO entityToDTO(Ticket ticket){
+
+        TicketCreateDTO ticketCreateDTO = TicketCreateDTO.builder()
+                .tno(ticket.getTno())
+                .title(ticket.getTitle())
+                .content(ticket.getContent())
+                .purpose(ticket.getPurpose())
+                .requirement(ticket.getRequirement())
+                .grade(ticket.getGrade())
+                .deadline(ticket.getDeadline())
+                .writer(ticket.getWriter().getEmail())
+                .build();
+
+        List<UploadTicketFile> documentFileList = ticket.getDocumentList();
+
+        if(documentFileList == null || documentFileList.size() == 0 ){
+            return ticketCreateDTO;
+        }
+
+        ticketCreateDTO.setUploadFileNames(documentFileList);
+
+        return ticketCreateDTO;
+    }
+
+    @Override
+    public List<FileItemDTO> getTicketFiles(Long tno) {
+
+        Ticket ticket = ticketRepository.findById(tno)
+                .orElseThrow(() -> new IllegalArgumentException("Ticket not found: " + tno));
+
+        List<UploadTicketFile> files = ticket.getDocumentList();
+        if (files == null || files.isEmpty()) {
+            return List.of();
+        }
+
+        return files.stream()
+                .sorted(Comparator.comparingInt(UploadTicketFile::getOrd))
+                .map(f -> FileItemDTO.builder()
+                        .ord(f.getOrd())
+                        .originalName(f.getOriginalName())
+                        .ext(f.getExt())
+                        .size(f.getSize())
+                        .image(f.isImage())
+                        .savedName(f.getSavedName())                 // 프론트에서 필요 없으면 빼도 됨
+                        .viewUrl(fileUtil.makeViewUrl(f.getSavedName()))
+                        .previewUrl(fileUtil.makePreviewUrl(f))
+                        .build()
+                )
+                .toList();
+    }
+
 }

@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.*;
 import org.springframework.test.annotation.Rollback;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -76,8 +77,8 @@ class TicketPersonalServiceTests {
                 .deadline(LocalDateTime.now().plusDays(2))
                 .receivers(receivers)
                 .build();
-
-        TicketSentListDTO created = ticketService.create(req, writerEmail);
+        List<MultipartFile> files = List.of();
+        TicketSentListDTO created = ticketService.create(req, writerEmail, files);
         createdTno = created.getTno();
 
         createdTpno = ticketPersonalRepository.findPnoByReceiverAndTno(receiverEmail, createdTno)
