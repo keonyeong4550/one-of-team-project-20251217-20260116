@@ -151,7 +151,7 @@ const ReplyComponent = ({ bno }) => {
 
                     {/* [삭제] 버튼: 본인 또는 관리자에게 보여줌 */}
                     {canDelete(reply.replyer) && (
-                      <buttonpi
+                      <button
                         onClick={() => handleClickDelete(reply.rno)}
                         className="text-xs text-gray-400 hover:text-red-500 transition-colors"
                       >
