@@ -60,7 +60,7 @@ public class CustomSecurityConfig {
         http.exceptionHandling(config -> {config.accessDeniedHandler(new CustomAccessDeniedHandler());
         });
 
-         http.authenticationProvider(authenticationProvider(passwordEncoder()));
+        http.authenticationProvider(authenticationProvider(passwordEncoder()));
 
         // Spring Security의 CORS 필터를 활성화하고 corsConfigurationSource() 설정에 따라 프론트엔드의 API 요청을 허용한다.
         http.cors(httpSecurityCorsConfigurer -> {
@@ -88,7 +88,7 @@ public class CustomSecurityConfig {
         // 모든 도메인 허용
         configuration.setAllowedOriginPatterns(Arrays.asList("*"));
         // REST API 전용
-        configuration.setAllowedMethods(Arrays.asList("HEAD", "GET", "POST", "PUT", "DELETE"));
+        configuration.setAllowedMethods(Arrays.asList("HEAD", "GET", "POST", "PUT", "PATCH", "DELETE"));
         // JWT 전달을 위한 Authorization 헤더 허용
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Cache-Control", "Content-Type"));
         // 쿠키/인증 정보 허용
