@@ -1,5 +1,7 @@
 import jwtAxios from "../util/jwtUtil"; // 커스텀 axios 임포트
 import { API_SERVER_HOST } from "./memberApi";
+import axios from "axios";
+import { getCookie } from "../util/cookieUtil";
 
 const prefix = `${API_SERVER_HOST}/api/board`;
 
@@ -43,4 +45,12 @@ export const putOne = async (bno, boardObj) => {
 export const deleteOne = async (bno) => {
   const res = await jwtAxios.delete(`${prefix}/${bno}`);
   return res.data;
+};
+
+// 최근 공지사항 3개 가져오기
+export const getRecentBoards = async () => {
+    const res = await jwtAxios.get(`${prefix}/list`, { // 백엔드 list 로직이 PageRequestDTO를 받으므로 파라미터로 전달
+        params: { page: 1, size: 3 }                   // 최신순 정렬은 보통 백엔드 기본값이거나 추가 파라미터 필요
+    });
+    return res.data.dtoList;
 };
