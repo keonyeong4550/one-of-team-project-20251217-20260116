@@ -1,0 +1,19 @@
+fastapi==0.112.0
+uvicorn[standard]==0.30.6
+pydantic==2.9.2
+pydantic-settings==2.4.0
+
+langchain==0.1.20
+langchain-core==0.1.52
+langchain-community==0.0.38
+# [삭제됨] langchain-google-genai
+
+chromadb==0.5.0
+tiktoken==0.7.0
+python-dotenv==1.0.1
+loguru==0.7.2
+requests==2.32.3
+PyJWT==2.9.0
+
+SQLAlchemy==2.0.25
+PyMySQL==1.1.0

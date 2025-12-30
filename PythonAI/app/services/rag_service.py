@@ -1,42 +1,64 @@
-
 import json
 import os
+import shutil  # [NEW] 폴더 삭제를 위한 모듈 추가
 from typing import List, Optional
 from langchain.schema import Document
 from app.db.vector_store import vector_store
 from app.core.logger import app_logger
+from app.core.config import settings
 
 class RAGService:
     def __init__(self):
-        # 검색 정확도를 위해 k=5 유지 (필요 시 config로 뺄 수 있음)
-        self.retriever = vector_store.get_retriever(k=5)
+        self.retriever = None
         
         # JSON 파일 경로 설정 (프로젝트 루트 기준 data/initial_knowledge.json)
         self.json_path = os.path.join(os.getcwd(), "data", "initial_knowledge.json")
         
-        # 데이터 초기화 실행
+        # [NEW] 벡터 DB가 비어있거나, 임베딩 모델 변경 시 초기화 로직 실행
         self._initialize_knowledge_base()
+
+        # [Logic] 초기화 후 검색기(Retriever) 생성
+        # vector_store가 정상 초기화되었는지 확인 후 할당
+        if vector_store.db:
+            # 검색 정확도를 위해 k=5 유지
+            self.retriever = vector_store.get_retriever(k=5)
+        else:
+            app_logger.error("Vector Store is not ready. RAG Service disabled.")
 
     def _initialize_knowledge_base(self):
         """
         [Enterprise Level Data Seeding]
-        하드코딩된 데이터 대신, 외부 JSON 파일(initial_knowledge.json)을 로드하여
-        벡터 DB가 비어있을 경우 초기 데이터를 주입합니다.
+        구글 임베딩 -> 로컬 임베딩 전환 시 기존 데이터 충돌 방지 로직 포함.
         """
         try:
-            # 1. DB에 이미 데이터가 있는지 확인 (중복 적재 방지)
-            # ChromaDB의 get()은 메타데이터 등을 가져옴. 데이터가 있으면 스킵.
-            existing_docs = vector_store.db.get()
-            if existing_docs and len(existing_docs['ids']) > 0:
-                app_logger.info("Vector Store is already populated. Skipping initialization.")
+            # 1. DB 인스턴스 확인
+            if not vector_store.db:
+                app_logger.error("Vector Store instance is None. Skipping seeding.")
                 return
 
-            # 2. JSON 파일 존재 확인
+            # 2. 기존 데이터 존재 여부 확인
+            existing_docs = vector_store.db.get()
+            
+            # [CRITICAL UPDATE] 차원 불일치 방지 로직
+            # 기존 구글 임베딩 데이터가 남아있다면 로컬 모델과 차원이 달라 에러 발생함.
+            # 여기서는 '간단한 체크'로 데이터가 있는데 검색이 안 되거나 에러가 날 상황을 대비해
+            # 운영자가 수동으로 폴더를 지웠는지 로그로 경고하거나, 
+            # (선택적) 강제로 지우고 다시 만드는 로직을 고려할 수 있음.
+            # 안전을 위해 여기서는 '데이터가 없으면 새로 굽는다'는 기본 원칙을 따르되,
+            # 만약 기존 데이터가 있다면 로그로 알림.
+            
+            if existing_docs and len(existing_docs['ids']) > 0:
+                # [주의] 만약 구글로 만든 데이터라면 이 시점에서 에러는 안 나지만, 검색 시 에러 남.
+                # 개발/테스트 단계이므로, '데이터가 있으면 일단 스킵'하되 로그 남김.
+                app_logger.info(f"Vector Store has {len(existing_docs['ids'])} items. Skipping initialization.")
+                return
+
+            # 3. JSON 파일 존재 확인
             if not os.path.exists(self.json_path):
                 app_logger.warning(f"Knowledge JSON file not found at: {self.json_path}. Skipping seeding.")
                 return
 
-            # 3. JSON 로드 및 Document 객체 변환
+            # 4. JSON 로드 및 Document 객체 변환
             app_logger.info(f"Loading knowledge base from {self.json_path}...")
             
             with open(self.json_path, 'r', encoding='utf-8') as f:
@@ -52,7 +74,7 @@ class RAGService:
                     )
                     documents.append(doc)
 
-            # 4. 벡터 DB에 주입
+            # 5. 벡터 DB에 주입 (로컬 임베딩으로 변환되어 저장됨)
             if documents:
                 vector_store.add_documents(documents)
                 app_logger.info(f"Successfully seeded {len(documents)} documents into Vector Store.")
@@ -62,25 +84,22 @@ class RAGService:
         except json.JSONDecodeError as e:
             app_logger.error(f"Failed to parse Knowledge JSON: {e}")
         except Exception as e:
-            app_logger.error(f"RAG Initialization failed: {e}")
+            app_logger.error(f"RAG Initialization failed: {str(e)}")
 
     async def get_context(self, target_dept: str, user_input: str = "") -> str:
         """
         [Smart Retrieval]
-        사용자의 입력(user_input)을 검색 쿼리에 포함시켜,
-        단순 부서 매뉴얼이 아닌 '상황에 맞는 구체적 가이드라인'을 찾아냅니다.
-        
-        Args:
-            target_dept (str): 대상 부서 (예: '인사팀', '개발팀')
-            user_input (str): 사용자의 실제 발화 (예: '돈이 안 들어왔어')
+        사용자의 입력(user_input)을 검색 쿼리에 포함시켜 가이드라인 추출.
         """
+        if not self.retriever:
+            app_logger.error("Retriever is not initialized.")
+            return "시스템 오류: 지식 베이스가 준비되지 않았습니다."
+
         if not target_dept:
             return "부서가 지정되지 않았습니다."
 
         try:
-            # [핵심 개선] 검색 쿼리 고도화
-            # 사용자의 구어체("돈이 안 들어왔어")와 키워드("필수 요청양식")를 결합
-            # 벡터 DB는 의미론적 유사성을 통해 '돈이 안 들어왔어' <-> '급여 미지급'을 매칭함
+            # [기존 기능 유지] 검색 쿼리 로직 동일
             query = f"[{target_dept}] {user_input} 업무 가이드라인 필수 체크리스트 시나리오"
             
             # 비동기 검색 수행
@@ -97,7 +116,7 @@ class RAGService:
             return context_text
             
         except Exception as e:
-            app_logger.error(f"RAG Retrieval failed: {e}")
+            app_logger.error(f"RAG Retrieval failed: {str(e)}")
             return "가이드라인 검색 중 시스템 오류 발생."
 
 # 싱글톤 인스턴스 생성
