@@ -4,6 +4,8 @@ import com.desk.domain.Member;
 import com.desk.dto.MemberDTO;
 import com.desk.dto.MemberJoinDTO;
 import com.desk.dto.MemberModifyDTO;
+import com.desk.dto.PageRequestDTO;
+import com.desk.dto.PageResponseDTO;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.stream.Collectors;
@@ -17,6 +19,9 @@ public interface MemberService {
      void modifyMember(MemberModifyDTO memberModifyDTO);
 
      void join(MemberJoinDTO memberJoinDTO);
+
+     // 일반 사용자용 멤버 검색 (승인된 멤버만)
+     PageResponseDTO<MemberDTO> searchActiveMembers(PageRequestDTO pageRequestDTO, String keyword, String department);
 
      default MemberDTO entityToDTO(Member member){
         

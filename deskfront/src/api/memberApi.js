@@ -33,3 +33,15 @@ export const joinPost = async (joinParam) => {
 
   return res.data;
 };
+
+// 멤버 검색 (일반 사용자용)
+export const searchMembers = async (keyword, page = 1, size = 20) => {
+  const params = {
+    page,
+    size,
+    keyword: keyword || null,
+    department: null // 필요시 부서 필터 추가할 것
+  };
+  const res = await jwtAxios.get(`${host}/search`, { params });
+  return res.data;
+};
