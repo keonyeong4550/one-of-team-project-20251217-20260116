@@ -3,40 +3,19 @@ import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import MemberPickerModal from "./MemberPickerModal";
 import { searchMembers } from "../../api/memberApi";
+import { getChatRooms, createGroupRoom, createOrGetDirectRoom } from "../../api/chatApi";
 
-// 임시 목업: 사용자/채팅방 (백엔드 대신)
-const MOCK_USERS = [
-  { email: "alice@test.com", nickname: "Alice" },
-  { email: "bob@test.com", nickname: "Bob" },
-  { email: "charlie@test.com", nickname: "Charlie" },
-  { email: "david@test.com", nickname: "David" },
-];
-
-const INITIAL_ROOMS = [
-  {
-    id: 1,
-    isGroup: false,
-    user1Id: "alice@test.com",
-    user2Id: "bob@test.com",
-    lastMessage: { content: "안녕!", createdAt: new Date().toISOString() },
-    unreadCount: 2,
-  },
-  {
-    id: 2,
-    isGroup: true,
-    name: "프로젝트 그룹",
-    participants: ["alice@test.com", "bob@test.com", "charlie@test.com"],
-    lastMessage: { content: "회의 자료 올렸어요", createdAt: new Date().toISOString() },
-    unreadCount: 0,
-  },
-];
-
-const ChatListComponent = ({ currentUserId }) => {
+const ChatListComponent = ({ currentUserId: propCurrentUserId }) => {
   const navigate = useNavigate();
   const loginInfo = useSelector((state) => state.loginSlice);
+  const currentUserId = loginInfo?.email || propCurrentUserId || "";
 
-  // ✅ 백엔드 대신 로컬 상태로 목록 관리
-  const [chatRooms, setChatRooms] = useState(INITIAL_ROOMS);
+  // 채팅방 목록 상태
+  const [chatRooms, setChatRooms] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  
+  // 모달 관련 상태
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [selectedUsers, setSelectedUsers] = useState([]);
   const [searchKeyword, setSearchKeyword] = useState("");
@@ -45,12 +24,61 @@ const ChatListComponent = ({ currentUserId }) => {
   const [searchLoading, setSearchLoading] = useState(false);
   const [searchError, setSearchError] = useState(null);
   const [userInfoMap, setUserInfoMap] = useState({}); // email -> {nickname, department}
+  const [groupName, setGroupName] = useState(""); // 그룹 채팅방 이름
+
+  // 채팅방 목록 로드
+  useEffect(() => {
+    loadChatRooms();
+  }, []);
+
+  const loadChatRooms = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const rooms = await getChatRooms();
+      // 백엔드 응답을 프론트엔드 형식으로 변환
+      const transformedRooms = rooms.map((room) => {
+        // participants에서 현재 사용자 제외한 상대방 찾기
+        const otherParticipants = room.participants?.filter(
+          (p) => p.userId !== currentUserId
+        ) || [];
+        
+        return {
+          id: room.id,
+          isGroup: room.roomType === "GROUP",
+          name: room.name,
+          participants: room.participants?.map((p) => p.userId) || [],
+          participantInfo: room.participants?.map((p) => ({
+            email: p.userId,
+            nickname: p.nickname || p.userId,
+          })) || [],
+          lastMessage: room.lastMsgContent
+            ? {
+                content: room.lastMsgContent,
+                createdAt: room.lastMsgAt,
+              }
+            : null,
+          unreadCount: room.unreadCount || 0,
+          // 1:1 채팅용
+          user1Id: !otherParticipants.length ? currentUserId : currentUserId,
+          user2Id: otherParticipants.length > 0 ? otherParticipants[0].userId : null,
+        };
+      });
+      setChatRooms(transformedRooms);
+    } catch (err) {
+      console.error("채팅방 목록 로드 실패:", err);
+      setError("채팅방 목록을 불러오는데 실패했습니다.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleCreateChat = () => {
     setShowCreateModal(true);
     setSelectedUsers([]);
     setSearchKeyword("");
     setSelectedDepartment("");
+    setGroupName("");
   };
 
   // 멤버 검색 API 호출 (디바운싱 적용) - 검색어 또는 부서 선택 시 검색
@@ -133,43 +161,42 @@ const ChatListComponent = ({ currentUserId }) => {
     return message.content.length > 30 ? message.content.slice(0, 30) + "..." : message.content;
   };
 
-  // 백엔드 createChatRoom 대신: 로컬에서 방 생성
-  const handleCreateRoom = () => {
+  // 채팅방 생성
+  const handleCreateRoom = async () => {
     if (selectedUsers.length === 0) {
       return alert("최소 1명 이상의 참여자를 선택해주세요.");
     }
 
-    const nextId = Math.max(0, ...chatRooms.map((r) => r.id)) + 1;
-    const isGroup = selectedUsers.length > 1;
-
-    // 참여자 정보 생성
-    const participantInfo = selectedUsers.map(email => ({
-      email,
-      nickname: userInfoMap[email]?.nickname || email
-    }));
-
-    const newRoom = isGroup
-      ? {
-          id: nextId,
-          isGroup: true,
-          participants: [currentUserId, ...selectedUsers],
-          participantInfo: participantInfo,
-          lastMessage: null,
-          unreadCount: 0,
+    try {
+      let newRoom;
+      
+      if (selectedUsers.length === 1) {
+        // 1:1 채팅방 생성
+        newRoom = await createOrGetDirectRoom({ targetEmail: selectedUsers[0] });
+      } else {
+        // 그룹 채팅방 생성
+        if (!groupName.trim()) {
+          return alert("그룹 채팅방 이름을 입력해주세요.");
         }
-      : {
-          id: nextId,
-          isGroup: false,
-          user1Id: currentUserId,
-          user2Id: selectedUsers[0],
-          participantInfo: participantInfo,
-          lastMessage: null,
-          unreadCount: 0,
-        };
+        newRoom = await createGroupRoom({
+          name: groupName.trim(),
+          participantEmails: selectedUsers,
+        });
+      }
 
-    setChatRooms((prev) => [newRoom, ...prev]);
-    setShowCreateModal(false);
-    navigate(`/chat/${newRoom.id}`);
+      setShowCreateModal(false);
+      setSelectedUsers([]);
+      setGroupName("");
+      
+      // 목록 새로고침
+      await loadChatRooms();
+      
+      // 생성된 방으로 이동
+      navigate(`/chat/${newRoom.id}`);
+    } catch (err) {
+      console.error("채팅방 생성 실패:", err);
+      alert("채팅방 생성에 실패했습니다.");
+    }
   };
 
   return (
@@ -211,7 +238,11 @@ const ChatListComponent = ({ currentUserId }) => {
         </div>
 
         <div className="p-12 min-h-[450px] bg-gradient-to-b from-white to-gray-50/30">
-          {chatRooms.length === 0 ? (
+          {loading ? (
+            <div className="text-center text-gray-500 py-8">로딩 중...</div>
+          ) : error ? (
+            <div className="text-center text-red-500 py-8">{error}</div>
+          ) : chatRooms.length === 0 ? (
             <div className="text-center text-gray-500 py-8">
               채팅방이 없습니다. 새 채팅을 시작해보세요.
             </div>
@@ -283,9 +314,9 @@ const ChatListComponent = ({ currentUserId }) => {
         selectedDepartment={selectedDepartment}
         onChangeDepartment={setSelectedDepartment}
         onConfirm={handleCreateRoom}
-        showGroupName={false}
-        groupName=""
-        onChangeGroupName={() => {}}
+        showGroupName={selectedUsers.length > 1}
+        groupName={groupName}
+        onChangeGroupName={setGroupName}
       />
     </>
   );

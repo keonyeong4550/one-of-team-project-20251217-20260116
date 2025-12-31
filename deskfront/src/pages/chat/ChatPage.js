@@ -1,24 +1,8 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import ChatRoom from "../../components/chat/ChatRoom";
 import useCustomLogin from "../../hooks/useCustomLogin";
-
-// 임시 목업: 채팅방 정보(백엔드 대신)
-const MOCK_ROOMS = [
-  {
-    id: 1,
-    isGroup: false,
-    user1Id: "alice@test.com",
-    user2Id: "bob@test.com",
-    name: null,
-  },
-  {
-    id: 2,
-    isGroup: true,
-    name: "프로젝트 그룹",
-    participants: ["alice@test.com", "bob@test.com", "charlie@test.com"],
-  },
-];
+import { getChatRoom } from "../../api/chatApi";
 
 const ChatPage = () => {
   const { chatRoomId } = useParams();
@@ -26,12 +10,56 @@ const ChatPage = () => {
   const { loginState } = useCustomLogin();
   const currentUserId = loginState?.email || "";
 
-  // 백엔드 호출 없이 params 기반으로 목업에서 찾기
-  const chatRoomInfo = useMemo(() => {
-    const id = Number(chatRoomId);
-    if (!id) return null;
-    return MOCK_ROOMS.find((r) => r.id === id) || null;
-  }, [chatRoomId]);
+  const [chatRoomInfo, setChatRoomInfo] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // 채팅방 정보 로드
+  useEffect(() => {
+    const loadChatRoom = async () => {
+      const id = Number(chatRoomId);
+      if (!id) {
+        setError("잘못된 채팅방 ID입니다.");
+        setLoading(false);
+        return;
+      }
+
+      setLoading(true);
+      setError(null);
+      try {
+        const room = await getChatRoom(id);
+        // 백엔드 응답을 프론트엔드 형식으로 변환
+        const otherParticipants = room.participants?.filter(
+          (p) => p.userId !== currentUserId
+        ) || [];
+
+        const transformedRoom = {
+          id: room.id,
+          isGroup: room.roomType === "GROUP",
+          name: room.name,
+          participants: room.participants?.map((p) => p.userId) || [],
+          participantIds: room.participants?.map((p) => p.userId) || [],
+          participantInfo: room.participants?.map((p) => ({
+            email: p.userId,
+            nickname: p.nickname || p.userId,
+          })) || [],
+          // 1:1 채팅용
+          user1Id: currentUserId,
+          user2Id: otherParticipants.length > 0 ? otherParticipants[0].userId : null,
+        };
+        setChatRoomInfo(transformedRoom);
+      } catch (err) {
+        console.error("채팅방 정보 로드 실패:", err);
+        setError("채팅방 정보를 불러오는데 실패했습니다.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (currentUserId) {
+      loadChatRoom();
+    }
+  }, [chatRoomId, currentUserId]);
 
   if (!currentUserId) {
     return (
@@ -41,11 +69,18 @@ const ChatPage = () => {
     );
   }
 
-  // 존재하지 않는 방이면 목록으로
-  if (!chatRoomInfo) {
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-gray-500">로딩 중...</div>
+      </div>
+    );
+  }
+
+  if (error || !chatRoomInfo) {
     return (
       <div className="flex items-center justify-center h-screen flex-col gap-4">
-        <div className="text-gray-500">존재하지 않는 채팅방입니다.</div>
+        <div className="text-gray-500">{error || "존재하지 않는 채팅방입니다."}</div>
         <button
           className="px-4 py-2 rounded-lg bg-gray-900 text-white"
           onClick={() => navigate("/chat")}

@@ -24,10 +24,16 @@ const refreshJWT = async (accessToken, refreshToken) => {
 //before request
 const beforeReq = (config) => {
   console.log("before request.............");
+  // #region agent log
+  fetch('http://127.0.0.1:7243/ingest/f3883f60-df33-41d9-a270-908f53fcfc00',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'jwtUtil.js:25',message:'beforeReq interceptor',data:{url:config?.url},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
+  // #endregion
   const memberInfo = getCookie("member");
   // 쿠키에서 member 조회, 없으면 로그인 필요 에러 반환
   if (!memberInfo) {
     console.log("Member NOT FOUND");
+    // #region agent log
+    fetch('http://127.0.0.1:7243/ingest/f3883f60-df33-41d9-a270-908f53fcfc00',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'jwtUtil.js:29',message:'Member not found',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
+    // #endregion
     return Promise.reject({ response: { data: { error: "REQUIRE_LOGIN" } } });
   }
   // 있으면 Authorization: Bearer accessToken 헤더 추가, 모든 jwtAxios 요청 시 자동 실행
@@ -35,6 +41,9 @@ const beforeReq = (config) => {
 
   // Authorization
   config.headers.Authorization = `Bearer ${accessToken}`;
+  // #region agent log
+  fetch('http://127.0.0.1:7243/ingest/f3883f60-df33-41d9-a270-908f53fcfc00',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'jwtUtil.js:37',message:'Auth header added',data:{hasToken:!!accessToken,tokenLength:accessToken?.length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
+  // #endregion
   return config;
 };
 

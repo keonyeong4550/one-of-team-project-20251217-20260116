@@ -33,14 +33,36 @@ public class JWTCheckFilter extends OncePerRequestFilter{
 
         log.info("check uri......................."+path);
 
-        // “로그인 안 한 사용자도 접근 가능한 API”는 JWT 체크 안 함
-        // api/member/ 경로의 호출은 체크하지 않음 
-        if(path.startsWith("/api/member/")) {
+        // #region agent log
+        try {
+            java.io.FileWriter fw = new java.io.FileWriter("c:\\Users\\EZEN\\Desktop\\gitProject\\.cursor\\debug.log", true);
+            fw.write(String.format("{\"sessionId\":\"debug-session\",\"runId\":\"run1\",\"hypothesisId\":\"A\",\"location\":\"JWTCheckFilter.shouldNotFilter:32\",\"message\":\"Path check\",\"data\":{\"path\":\"%s\",\"startsWithApiMember\":%s},\"timestamp\":%d}%n", 
+                path, path.startsWith("/api/member/"), System.currentTimeMillis()));
+            fw.close();
+        } catch (Exception e) {}
+        // #endregion
+
+        // "로그인 안 한 사용자도 접근 가능한 API"는 JWT 체크 안 함
+        // api/member/login, api/member/join만 체크하지 않음 (search는 인증 필요)
+        if(path.equals("/api/member/login") || path.equals("/api/member/join")) {
+            // #region agent log
+            try {
+                java.io.FileWriter fw = new java.io.FileWriter("c:\\Users\\EZEN\\Desktop\\gitProject\\.cursor\\debug.log", true);
+                fw.write(String.format("{\"sessionId\":\"debug-session\",\"runId\":\"run1\",\"hypothesisId\":\"A\",\"location\":\"JWTCheckFilter.shouldNotFilter:38\",\"message\":\"Skipping filter for public endpoint\",\"data\":{\"path\":\"%s\"},\"timestamp\":%d}%n", 
+                    path, System.currentTimeMillis()));
+                fw.close();
+            } catch (Exception e) {}
+            // #endregion
             return true;
         }
 
         // 이미지 조회 경로는 체크하지 않음
         if (path.startsWith("/api/files/view/") || path.startsWith("/api/files/download/")) {
+            return true;
+        }
+
+        // WebSocket 핸드셰이크 경로는 체크하지 않음 (인증은 WebSocketSecurityConfig에서 처리)
+        if (path.startsWith("/ws/")) {
             return true;
         }
 
@@ -53,6 +75,15 @@ public class JWTCheckFilter extends OncePerRequestFilter{
         log.info("------------------------JWTCheckFilter------------------");
         // 클라이언트에서 Authorization: Bearer <JWT>로 전달
         String authHeaderStr = request.getHeader("Authorization");
+
+        // #region agent log
+        try {
+            java.io.FileWriter fw = new java.io.FileWriter("c:\\Users\\EZEN\\Desktop\\gitProject\\.cursor\\debug.log", true);
+            fw.write(String.format("{\"sessionId\":\"debug-session\",\"runId\":\"run1\",\"hypothesisId\":\"C\",\"location\":\"JWTCheckFilter.doFilterInternal:60\",\"message\":\"Auth header check\",\"data\":{\"uri\":\"%s\",\"hasAuth\":%s},\"timestamp\":%d}%n", 
+                request.getRequestURI(), authHeaderStr != null, System.currentTimeMillis()));
+            fw.close();
+        } catch (Exception e) {}
+        // #endregion
 
         try {
             //Bearer accestoken... "Bearer " 접두사 제거

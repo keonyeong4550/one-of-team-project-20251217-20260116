@@ -36,12 +36,18 @@ export const joinPost = async (joinParam) => {
 
 // 멤버 검색 (일반 사용자용)
 export const searchMembers = async (keyword, page = 1, size = 20, department = null) => {
+  // #region agent log
+  fetch('http://127.0.0.1:7243/ingest/f3883f60-df33-41d9-a270-908f53fcfc00',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'memberApi.js:38',message:'searchMembers called',data:{keyword,page,size,department},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
+  // #endregion
   const params = {
     page,
     size,
     keyword: keyword || null,
     department: department || null
   };
+  // #region agent log
+  fetch('http://127.0.0.1:7243/ingest/f3883f60-df33-41d9-a270-908f53fcfc00',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'memberApi.js:45',message:'Before jwtAxios.get',data:{url:`${host}/search`,params},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
+  // #endregion
   const res = await jwtAxios.get(`${host}/search`, { params });
   return res.data;
 };
