@@ -1,36 +1,21 @@
-import axios from "axios";
 import jwtAxios from "../util/jwtUtil";
-// [핵심 수정 1] 백엔드 호스트 주소(API_SERVER_HOST)를 가져옵니다.
 import { API_SERVER_HOST } from "./memberApi";
-
-// ----------------------------------------------------------------
-// [환경 설정]
-// Python AI 서버 주소 (FastAPI)
-const PYTHON_API_URL = "http://localhost:8000/api/v1";
-
-// Python 서버 보안 키 (pythonai/app/core/config.py의 BACKEND_API_KEY와 일치해야 함)
-const AI_API_KEY = "my-super-secret-key-shared-with-java";
-
-// Python AI 서버용 클라이언트 (별도 Axios 인스턴스)
-const aiClient = axios.create({
-  baseURL: PYTHON_API_URL,
-  headers: {
-    "Content-Type": "application/json",
-    "x-api-key": AI_API_KEY,
-  },
-});
 
 export const aiSecretaryApi = {
   /**
    * [AI 채팅 및 분석 요청]
-   * Python FastAPI 서버로 요청을 보냅니다.
+   * Java Backend Proxy (/api/ai/ticket/chat)로 요청을 보냅니다.
    */
   sendMessage: async (payload) => {
     try {
-      const response = await aiClient.post("/chat", payload);
-      return response.data; // MediationResponse 반환
+      // [수정] 백엔드 컨트롤러 주소 변경 반영 (/api/ai/chat -> /api/ai/ticket/chat)
+      const response = await jwtAxios.post(
+        `${API_SERVER_HOST}/api/ai/ticket/chat`,
+        payload
+      );
+      return response.data; // AITicketResponseDTO 반환
     } catch (error) {
-      console.error("AI Chat Error:", error);
+      console.error("AI Chat Error (Proxy):", error);
       throw error;
     }
   },
@@ -38,14 +23,9 @@ export const aiSecretaryApi = {
   /**
    * [티켓 최종 전송]
    * Java Backend (/api/tickets)로 티켓 생성 요청
-   *
-   * [수정 내역 및 분석]
-   * 1. 기존 코드의 "/api/tickets"는 baseURL이 없어서 프론트엔드(localhost:3000)로 요청됨 -> 404 발생
-   * 2. 이를 `${API_SERVER_HOST}/api/tickets`로 변경하여 백엔드(localhost:8080)로 명확히 타겟팅함
-   * 3. 이로써 Payload가 Spring Boot 컨트롤러에 도달하고, JPA를 통해 실제 DB에 INSERT 됨.
    */
-  submitTicket: async (ticketData, writerDept) => {
-    // [Validation] 수신자 리스트가 비어있으면 전송 불가 (DB 무결성 보호)
+  submitTicket: async (ticketData, files, writerEmail) => {
+    // 1. 담당자 유효성 검사
     if (!ticketData.receivers || ticketData.receivers.length === 0) {
       console.error("Validation Failed: No receivers assigned.");
       throw new Error(
@@ -54,30 +34,48 @@ export const aiSecretaryApi = {
     }
 
     try {
-      // [날짜 포맷팅]
-      // AI가 'YYYY-MM-DD'형태로 주면 뒤에 시간을 붙여 Java LocalDateTime 포맷(yyyy-MM-dd HH:mm) 준수
+      // 2. 마감일 시간 포맷 보정 (YYYY-MM-DD -> YYYY-MM-DD 09:00)
       let finalDeadline = ticketData.deadline;
       if (finalDeadline && finalDeadline.length === 10) {
         finalDeadline += " 09:00";
       }
 
-      const payload = {
+      // 3. FormData 생성 (파일 업로드 포함)
+      const formData = new FormData();
+
+      // 3-1. 티켓 정보 JSON 변환하여 추가
+      const ticketPayload = {
         title: ticketData.title,
         content: ticketData.content,
         purpose: ticketData.purpose,
         requirement: ticketData.requirement,
         grade: ticketData.grade,
         deadline: finalDeadline,
-        receivers: ticketData.receivers, // 검증된 수신자 리스트
+        receivers: ticketData.receivers, // ["email1", "email2"]
       };
 
-      // [핵심 수정 2] 절대 경로 사용
-      // jwtAxios를 사용하여 헤더에 'Authorization: Bearer 토큰'을 자동 주입
+      // Blob으로 감싸서 'application/json' 타입 명시 (Spring @RequestPart 호환)
+      const jsonBlob = new Blob([JSON.stringify(ticketPayload)], {
+        type: "application/json",
+      });
+      formData.append("ticket", jsonBlob);
+
+      // 3-2. 파일 리스트 추가
+      if (files && files.length > 0) {
+        files.forEach((file) => {
+          formData.append("files", file);
+        });
+      }
+
+      // 4. 전송 (Content-Type은 axios가 자동으로 설정함)
       const response = await jwtAxios.post(
         `${API_SERVER_HOST}/api/tickets`,
-        payload,
+        formData,
         {
-          params: { writer: writerDept },
+          params: { writer: writerEmail },
+          headers: {
+            "Content-Type": "multipart/form-data", // 명시적으로 지정
+          },
         }
       );
 
@@ -90,12 +88,11 @@ export const aiSecretaryApi = {
 
   /**
    * [헬스 체크]
-   * Python 서버 생존 여부 확인
+   * Java 서버 연결 확인용
    */
   checkHealth: async () => {
     try {
-      const response = await aiClient.get("/health");
-      return response.status === 200;
+      return true;
     } catch (error) {
       return false;
     }
