@@ -53,9 +53,9 @@ public class OllamaClient {
             // Reactor Netty HttpClient 설정
             HttpClient httpClient = HttpClient.create()
                     .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 5000) // 연결 timeout: 5초
-                    .responseTimeout(Duration.ofSeconds(35)) // 응답 timeout: 35초 (Reactor timeout보다 약간 길게)
+                    .responseTimeout(Duration.ofSeconds(360)) // 응답 timeout: 360초 (6분) - Reactor timeout보다 약간 길게
                     .doOnConnected(conn -> 
-                        conn.addHandlerLast(new ReadTimeoutHandler(35)) // 읽기 timeout: 35초
+                        conn.addHandlerLast(new ReadTimeoutHandler(360)) // 읽기 timeout: 360초 (6분)
                             .addHandlerLast(new WriteTimeoutHandler(10)) // 쓰기 timeout: 10초
                     );
             
@@ -122,7 +122,7 @@ public class OllamaClient {
         }
 
         // 모델 선택 및 Cloud 모델 여부 판단
-        String modelName = "gpt-oss:20b-cloud"; // 기본 모델 (필요시 설정에서 가져올 수 있음)
+        String modelName = "qwen3:8b"; // 기본 모델 (필요시 설정에서 가져올 수 있음)
         boolean isCloud = isCloudModel(modelName);
         
         // Cloud 모델 감지 로그
@@ -215,8 +215,8 @@ public class OllamaClient {
         // Cloud 모델 여부에 따라 옵션 분기
         requestBody.put("options", getModelOptions(modelName, isCloud));
 
-        // Cloud 모델은 더 짧은 timeout 적용
-        Duration timeoutDuration = isCloud ? Duration.ofSeconds(25) : Duration.ofSeconds(30);
+        // timeout: 6분 (360초) - 임시 설정
+        Duration timeoutDuration = Duration.ofSeconds(360);
         
         log.info("[Ollama] 필터링 요청 | baseUrl={} | model={} | isCloud={} | timeout={}s", 
                 ollamaConfig.getBaseUrl(), modelName, isCloud, timeoutDuration.getSeconds());
@@ -237,56 +237,14 @@ public class OllamaClient {
                 .timeout(timeoutDuration)
                 // map 연산자 사용 (flatMap 대신) - timeout이 제대로 전파되도록
                 .map(rawResponse -> {
-                    // #region agent log
-                    try {
-                        java.io.FileWriter fw = new java.io.FileWriter("c:\\Users\\EZEN\\Desktop\\gitProject\\.cursor\\debug.log", true);
-                        fw.write(String.format("{\"sessionId\":\"debug-session\",\"runId\":\"run1\",\"hypothesisId\":\"A\",\"location\":\"OllamaClient.filterMessage:239\",\"message\":\"rawResponse 구조 확인\",\"data\":{\"rawResponseNotNull\":%s,\"rawResponseKeys\":%s},\"timestamp\":%d}%n", 
-                                rawResponse != null, 
-                                rawResponse != null ? rawResponse.keySet().toString() : "null",
-                                System.currentTimeMillis()));
-                        if (rawResponse != null && rawResponse.containsKey("message")) {
-                            Object msgObj = rawResponse.get("message");
-                            if (msgObj instanceof Map) {
-                                Map<String, Object> msg = (Map<String, Object>) msgObj;
-                                fw.write(String.format("{\"sessionId\":\"debug-session\",\"runId\":\"run1\",\"hypothesisId\":\"A\",\"location\":\"OllamaClient.filterMessage:242\",\"message\":\"message 객체 확인\",\"data\":{\"messageKeys\":%s,\"hasContent\":%s},\"timestamp\":%d}%n", 
-                                        msg.keySet().toString(),
-                                        msg.containsKey("content"),
-                                        System.currentTimeMillis()));
-                            }
-                        }
-                        fw.close();
-                    } catch (Exception e) {}
-                    // #endregion
-                    
-                    // content 변수를 try 블록 밖에서 선언하여 catch 블록에서도 접근 가능하도록 수정
+                    // content 변수를 try 블록 밖에서 선언하여 catch 블록에서도 접근 가능하도록 함
                     String content = null;
                     try {
                         // 1) 응답에서 message.content(문자열) 뽑기
                         content = extractContent(rawResponse);
-                        
-                        // #region agent log
-                        try {
-                            java.io.FileWriter fw = new java.io.FileWriter("c:\\Users\\EZEN\\Desktop\\gitProject\\.cursor\\debug.log", true);
-                            fw.write(String.format("{\"sessionId\":\"debug-session\",\"runId\":\"run1\",\"hypothesisId\":\"A\",\"location\":\"OllamaClient.filterMessage:244\",\"message\":\"extractContent 결과\",\"data\":{\"contentNotNull\":%s,\"contentLength\":%d,\"contentPreview\":\"%s\"},\"timestamp\":%d}%n", 
-                                    content != null,
-                                    content != null ? content.length() : 0,
-                                    content != null && content.length() > 100 ? content.substring(0, 100) : (content != null ? content : "null"),
-                                    System.currentTimeMillis()));
-                            fw.close();
-                        } catch (Exception e) {}
-                        // #endregion
 
                         // 2) content 비면 fallback
                         if (content == null || content.trim().isEmpty()) {
-                            // #region agent log
-                            try {
-                                java.io.FileWriter fw = new java.io.FileWriter("c:\\Users\\EZEN\\Desktop\\gitProject\\.cursor\\debug.log", true);
-                                fw.write(String.format("{\"sessionId\":\"debug-session\",\"runId\":\"run1\",\"hypothesisId\":\"B\",\"location\":\"OllamaClient.filterMessage:247\",\"message\":\"content 비어있음 - rawResponse 전체 구조 확인\",\"data\":{\"rawResponse\":%s},\"timestamp\":%d}%n", 
-                                        objectMapper.writeValueAsString(rawResponse),
-                                        System.currentTimeMillis()));
-                                fw.close();
-                            } catch (Exception e) {}
-                            // #endregion
                             log.warn("[Ollama] content 비어있음 -> 원문 fallback");
                             return fallbackResult;
                         }
@@ -362,68 +320,13 @@ public class OllamaClient {
 
     @SuppressWarnings("unchecked")
     private String extractContent(Map rawResponse) {
-        // #region agent log
-        try {
-            java.io.FileWriter fw = new java.io.FileWriter("c:\\Users\\EZEN\\Desktop\\gitProject\\.cursor\\debug.log", true);
-            fw.write(String.format("{\"sessionId\":\"debug-session\",\"runId\":\"run1\",\"hypothesisId\":\"C\",\"location\":\"OllamaClient.extractContent:322\",\"message\":\"extractContent 진입\",\"data\":{\"rawResponseNotNull\":%s},\"timestamp\":%d}%n", 
-                    rawResponse != null, System.currentTimeMillis()));
-            fw.close();
-        } catch (Exception e) {}
-        // #endregion
-        
-        if (rawResponse == null) {
-            // #region agent log
-            try {
-                java.io.FileWriter fw = new java.io.FileWriter("c:\\Users\\EZEN\\Desktop\\gitProject\\.cursor\\debug.log", true);
-                fw.write(String.format("{\"sessionId\":\"debug-session\",\"runId\":\"run1\",\"hypothesisId\":\"C\",\"location\":\"OllamaClient.extractContent:324\",\"message\":\"rawResponse가 null\",\"data\":{},\"timestamp\":%d}%n", 
-                        System.currentTimeMillis()));
-                fw.close();
-            } catch (Exception e) {}
-            // #endregion
-            return null;
-        }
+        if (rawResponse == null) return null;
 
         Object msgObj = rawResponse.get("message");
-        
-        // #region agent log
-        try {
-            java.io.FileWriter fw = new java.io.FileWriter("c:\\Users\\EZEN\\Desktop\\gitProject\\.cursor\\debug.log", true);
-            fw.write(String.format("{\"sessionId\":\"debug-session\",\"runId\":\"run1\",\"hypothesisId\":\"C\",\"location\":\"OllamaClient.extractContent:325\",\"message\":\"message 객체 확인\",\"data\":{\"hasMessage\":%s,\"messageType\":\"%s\"},\"timestamp\":%d}%n", 
-                    msgObj != null,
-                    msgObj != null ? msgObj.getClass().getSimpleName() : "null",
-                    System.currentTimeMillis()));
-            fw.close();
-        } catch (Exception e) {}
-        // #endregion
-        
-        if (!(msgObj instanceof Map)) {
-            // #region agent log
-            try {
-                java.io.FileWriter fw = new java.io.FileWriter("c:\\Users\\EZEN\\Desktop\\gitProject\\.cursor\\debug.log", true);
-                fw.write(String.format("{\"sessionId\":\"debug-session\",\"runId\":\"run1\",\"hypothesisId\":\"C\",\"location\":\"OllamaClient.extractContent:326\",\"message\":\"message가 Map이 아님\",\"data\":{\"rawResponseKeys\":%s},\"timestamp\":%d}%n", 
-                        rawResponse.keySet().toString(),
-                        System.currentTimeMillis()));
-                fw.close();
-            } catch (Exception e) {}
-            // #endregion
-            return null;
-        }
+        if (!(msgObj instanceof Map)) return null;
 
         Map<String, Object> message = (Map<String, Object>) msgObj;
         Object contentObj = message.get("content");
-        
-        // #region agent log
-        try {
-            java.io.FileWriter fw = new java.io.FileWriter("c:\\Users\\EZEN\\Desktop\\gitProject\\.cursor\\debug.log", true);
-            fw.write(String.format("{\"sessionId\":\"debug-session\",\"runId\":\"run1\",\"hypothesisId\":\"C\",\"location\":\"OllamaClient.extractContent:329\",\"message\":\"content 추출 시도\",\"data\":{\"hasContent\":%s,\"contentType\":\"%s\",\"messageKeys\":%s},\"timestamp\":%d}%n", 
-                    contentObj != null,
-                    contentObj != null ? contentObj.getClass().getSimpleName() : "null",
-                    message.keySet().toString(),
-                    System.currentTimeMillis()));
-            fw.close();
-        } catch (Exception e) {}
-        // #endregion
-        
         return contentObj != null ? contentObj.toString() : null;
     }
 

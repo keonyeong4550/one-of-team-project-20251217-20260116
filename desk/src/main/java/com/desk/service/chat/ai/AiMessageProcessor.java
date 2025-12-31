@@ -70,10 +70,10 @@ public class AiMessageProcessor {
         log.info("[AI] 메시지 처리 시작");
         
         try {
-            // 동기적으로 처리 (블로킹) - timeout 설정 포함
+            // 동기적으로 처리 (블로킹) - timeout 설정 포함 (6분)
             // filterMessage는 필터링된 메시지와 티켓 생성 여부를 함께 반환
             OllamaClient.FilterResult result = ollamaClient.filterMessage(originalMessage)
-                    .block(Duration.ofSeconds(35));
+                    .block(Duration.ofSeconds(360)); // 360초 (6분)
             
             log.info("[AI] 메시지 처리 완료 | ticketTrigger={}", result.isShouldCreateTicket());
             
