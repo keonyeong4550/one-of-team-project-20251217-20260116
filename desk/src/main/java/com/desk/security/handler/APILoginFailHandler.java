@@ -28,6 +28,10 @@ public class APILoginFailHandler implements AuthenticationFailureHandler{
             errorMessage = "PENDING_APPROVAL";
         } else if (exception.getMessage().equals("DELETED_ACCOUNT")) {
             errorMessage = "DELETED_ACCOUNT";
+        } else if (exception.getMessage().equals("FACE_LOGIN_DISABLED")) {
+            errorMessage = "FACE_LOGIN_DISABLED"; // 얼굴 로그인이 꺼져있는 경우
+        } else if (exception.getMessage().equals("FACE_NOT_RECOGNIZED")) {
+            errorMessage = "FACE_NOT_RECOGNIZED"; // 인식 결과가 없는 경우
         } else if (exception instanceof BadCredentialsException) {
             errorMessage = "BAD_CREDENTIALS"; // 비번 틀림
         }

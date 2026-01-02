@@ -26,9 +26,11 @@ public class Member {
     private Department department; // 부서
 
     @Builder.Default
+    @Column(name = "is_deleted")
     private boolean isDeleted = false; // 삭제 여부
 
     @Builder.Default
+    @Column(name = "is_approved")
     private boolean isApproved = false; // 승인 여부 (소셜 로그인이 아니면 기본 false)
 
 
@@ -41,6 +43,12 @@ public class Member {
     @Enumerated(EnumType.STRING)
     @Builder.Default
     private List<MemberRole> roleList = new ArrayList<>(); // List로 변경
+
+    @Column(name = "face_enabled")
+    @Builder.Default
+    private boolean faceEnabled = false; // 얼굴 로그인 활성화 여부
+
+    public void changeFaceEnabled(boolean faceEnabled) {this.faceEnabled = faceEnabled;}
 
     public void addRole(MemberRole memberRole){
         roleList.add(memberRole);

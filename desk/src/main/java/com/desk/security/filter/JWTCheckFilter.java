@@ -71,9 +71,10 @@ public class JWTCheckFilter extends OncePerRequestFilter{
             String department = (String) claims.get("department");
             Boolean approved = (Boolean) claims.get("approved");
             List<String> roleNames = (List<String>) claims.get("roleNames");
+            Boolean faceEnabled = (Boolean) claims.get("faceEnabled");
 
             // JWT에서 추출한 정보로 인증 객체(MemberDTO) 생성, UserDetails 역할
-            MemberDTO memberDTO = new MemberDTO(email, pw, nickname, social.booleanValue(), department, approved.booleanValue(), roleNames);
+            MemberDTO memberDTO = new MemberDTO(email, pw, nickname, social.booleanValue(), department, approved.booleanValue(), roleNames, faceEnabled);
 
             log.info("-----------------------------------");
             log.info(memberDTO);

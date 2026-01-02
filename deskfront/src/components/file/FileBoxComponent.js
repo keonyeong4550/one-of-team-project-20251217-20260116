@@ -72,6 +72,12 @@ const FileBoxComponent = () => {
             }
         }
     };
+      // 다운로드 확인 창 (displayName을 사용하여 사용자에게 안내)
+      const handleDownload = (uuid, fileName, displayName) => {
+        if (window.confirm(`'${displayName || fileName}' 파일을 다운로드 하시겠습니까?`)) {
+          downloadFile(uuid, fileName); // 실제 API 요청은 원본 fileName으로
+        }
+      };
 
     return (
         <div className="w-full">
@@ -147,7 +153,7 @@ const FileBoxComponent = () => {
                 ) : serverData?.dtoList?.length > 0 ? (
                     <div className="grid grid-cols-2 md:grid-cols-5 gap-10">
                         {serverData.dtoList.map((file) => (
-                            <div key={file.uuid} onClick={() => downloadFile(file.uuid, file.fileName)} className="group cursor-pointer relative">
+                            <div key={file.uuid} onClick={() => handleDownload(file.uuid, file.fileName, file.displayName)} className="group cursor-pointer relative">
                                 {/* 삭제 버튼 */}
                                 <button
                                     onClick={(e) => handleDeleteFile(e, file.uuid, file.displayName)}

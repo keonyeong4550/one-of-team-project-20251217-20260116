@@ -67,7 +67,8 @@ public class AdminServiceImpl implements AdminService {
                 member.isSocial(),
                 member.getDepartment() != null ? member.getDepartment().name() : null,
                 member.isApproved(),
-                member.getRoleList().stream().map(Enum::name).collect(Collectors.toList())
+                member.getRoleList().stream().map(Enum::name).collect(Collectors.toList()),
+                member.isFaceEnabled()
         );
     }
 }

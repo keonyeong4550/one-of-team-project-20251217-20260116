@@ -26,8 +26,9 @@ public class MemberDTO extends User {
     private String department; // 부서 정보 (String으로 처리)
     private boolean approved;
     private List<String> roleNames = new ArrayList<>();
+    private boolean faceEnabled;
 
-    public MemberDTO(String email, String pw, String nickname, boolean social, String department, boolean approved, List<String> roleNames) {
+    public MemberDTO(String email, String pw, String nickname, boolean social, String department, boolean approved, List<String> roleNames, boolean faceEnabled) {
         super(
                 email,
                 pw, // 권한을 SimpleGrantedAuthority로 변환 (ROLE_ 접두사 붙임)
@@ -40,6 +41,7 @@ public class MemberDTO extends User {
         this.department = department;
         this.approved = approved;
         this.roleNames = roleNames;
+        this.faceEnabled = faceEnabled;
     }
 
     // JWT에 들어갈 정보 (Claims)
@@ -52,6 +54,7 @@ public class MemberDTO extends User {
         dataMap.put("department", department); // JWT에 포함
         dataMap.put("approved", approved);
         dataMap.put("roleNames", roleNames);
+        dataMap.put("faceEnabled", faceEnabled);
         return dataMap;
     }
 }

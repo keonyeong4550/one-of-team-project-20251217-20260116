@@ -33,3 +33,30 @@ export const joinPost = async (joinParam) => {
 
   return res.data;
 };
+
+// 얼굴 등록 (PostgreSQL 저장 + MariaDB 상태 변경)
+export const registerFaceApi = async (email, file) => {
+    const formData = new FormData();
+    formData.append("email", email);
+    formData.append("faceFile", file);
+
+    const res = await axios.post(`${host}/face-register`, formData, {
+        headers: { "Content-Type": "multipart/form-data" }
+    });
+    return res.data;
+};
+
+// 얼굴 로그인 활성화/비활성화 토글
+export const updateFaceStatusApi = async (email, status) => {
+    const res = await axios.put(`${host}/update-face-status`, { email, status });
+    return res.data;
+};
+// 얼굴 로그인 요청 (FaceAuthenticationFilter가 가로채는 URL)
+export const loginFace = async (file) => {
+    const formData = new FormData();
+    formData.append("faceFile", file);
+    const res = await axios.post(`${host}/login/face`, formData, {
+        headers: { "Content-Type": "multipart/form-data" }
+    });
+    return res.data;
+}
