@@ -11,6 +11,8 @@ class ChatWebSocketClient {
     this.client = null;
     this.currentRoomId = null;
     this.onMessageCallback = null;
+    this.onConnectCallback = null;
+    this.onDisconnectCallback = null;
     this.reconnectDelay = 5000; // 5초
     this.maxReconnectAttempts = 5;
     this.reconnectAttempts = 0;
@@ -21,8 +23,9 @@ class ChatWebSocketClient {
    * @param {number} roomId - 채팅방 ID
    * @param {Function} onMessage - 메시지 수신 콜백
    * @param {Function} onConnect - 연결 성공 콜백 (선택)
+   * @param {Function} onDisconnect - 연결 해제 콜백 (선택)
    */
-  connect(roomId, onMessage, onConnect) {
+  connect(roomId, onMessage, onConnect, onDisconnect) {
     if (this.client && this.client.connected) {
       // 이미 연결되어 있고 같은 방이면 재연결 불필요
       if (this.currentRoomId === roomId) {
@@ -35,6 +38,7 @@ class ChatWebSocketClient {
     this.currentRoomId = roomId;
     this.onMessageCallback = onMessage;
     this.onConnectCallback = onConnect;
+    this.onDisconnectCallback = onDisconnect;
 
     // JWT 토큰 가져오기
     const memberInfo = getCookie("member");
@@ -87,13 +91,19 @@ class ChatWebSocketClient {
       },
       onWebSocketClose: () => {
         console.log("WebSocket 연결 종료");
+        
+        // 연결 해제 콜백 호출
+        if (this.onDisconnectCallback) {
+          this.onDisconnectCallback();
+        }
+        
         // 자동 재연결 시도
         if (this.reconnectAttempts < this.maxReconnectAttempts) {
           this.reconnectAttempts++;
           setTimeout(() => {
             if (this.currentRoomId) {
               console.log(`재연결 시도 ${this.reconnectAttempts}/${this.maxReconnectAttempts}`);
-              this.connect(this.currentRoomId, this.onMessageCallback);
+              this.connect(this.currentRoomId, this.onMessageCallback, this.onConnectCallback, this.onDisconnectCallback);
             }
           }, this.reconnectDelay);
         } else {
@@ -102,6 +112,11 @@ class ChatWebSocketClient {
       },
       onDisconnect: () => {
         console.log("WebSocket 연결 해제");
+        
+        // 연결 해제 콜백 호출
+        if (this.onDisconnectCallback) {
+          this.onDisconnectCallback();
+        }
       },
     });
 
@@ -146,6 +161,8 @@ class ChatWebSocketClient {
     }
     this.currentRoomId = null;
     this.onMessageCallback = null;
+    this.onConnectCallback = null;
+    this.onDisconnectCallback = null;
     this.reconnectAttempts = 0;
   }
 

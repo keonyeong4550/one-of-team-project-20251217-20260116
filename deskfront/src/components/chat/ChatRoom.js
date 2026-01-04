@@ -136,21 +136,20 @@ const ChatRoom = ({ chatRoomId, currentUserId, otherUserId, chatRoomInfo }) => {
       () => {
         // 연결 성공 시
         setConnected(true);
+      },
+      () => {
+        // 연결 해제 시
+        setConnected(false);
       }
     );
 
-    // 초기 연결 상태 확인
-    const checkConnection = setInterval(() => {
-      setConnected(chatWsClient.isConnected());
-    }, 1000);
-
-    return () => {
-      clearInterval(checkConnection);
-    };
+    // 초기 연결 상태 확인 (한 번만)
+    setConnected(chatWsClient.isConnected());
 
     // 컴포넌트 언마운트 시 연결 해제
     return () => {
       chatWsClient.disconnect();
+      setConnected(false);
     };
   }, [chatRoomId, currentUserId]);
 

@@ -122,7 +122,7 @@ public class OllamaClient {
         }
 
         // 모델 선택 및 Cloud 모델 여부 판단
-        String modelName = "qwen3:8b"; // 기본 모델 (필요시 설정에서 가져올 수 있음)
+        String modelName = ollamaConfig.getModelName();
         boolean isCloud = isCloudModel(modelName);
         
         // Cloud 모델 감지 로그
