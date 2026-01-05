@@ -128,12 +128,8 @@ public class CustomSecurityConfig {
     public DaoAuthenticationProvider authenticationProvider(PasswordEncoder passwordEncoder) {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
 
-
         authProvider.setUserDetailsService(customUserDetailsService);
         authProvider.setPasswordEncoder(passwordEncoder);
-
-        // ★ 핵심: UsernameNotFoundException을 BadCredentialsException으로 숨기지 않음
-        authProvider.setHideUserNotFoundExceptions(false);
 
         return authProvider;
     }
