@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import useInfiniteChat from "../../hooks/useInfiniteChat";
 import MemberPickerModal from "./MemberPickerModal";
+import TicketConfirmModal from "./TicketConfirmModal";
+import AIChatWidget from "../menu/AIChatWidget";
 import { searchMembers } from "../../api/memberApi";
 import { getMessages, sendMessageRest, markRead, leaveRoom, inviteUsers } from "../../api/chatApi";
 import chatWsClient from "../../api/chatWs";
@@ -29,6 +31,10 @@ const ChatRoom = ({ chatRoomId, currentUserId, otherUserId, chatRoomInfo }) => {
   const [searchLoading, setSearchLoading] = useState(false);
   const [searchError, setSearchError] = useState(null);
   const [userInfoMap, setUserInfoMap] = useState({});
+
+  // 티켓 작성 모달 관련 상태
+  const [isTicketModalOpen, setIsTicketModalOpen] = useState(false);
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
 
   const messagesEndRef = useRef(null);
   const chatContainerRef = useRef(null);
@@ -127,10 +133,9 @@ const ChatRoom = ({ chatRoomId, currentUserId, otherUserId, chatRoomInfo }) => {
           markRead(chatRoomId, { messageSeq: transformedMessage.messageSeq }).catch(console.error);
         }
         
-        // 티켓 생성 문맥 감지 시 티켓 작성 모달 띄우기
+        // 티켓 생성 문맥 감지 시 확인 모달 띄우기
         if (newMessage.ticketTrigger) {
-          // TODO: 티켓 작성 모달 띄우기
-          alert("티켓 생성 문맥이 감지되었습니다. 티켓 작성 모달을 띄워주세요.");
+          openConfirmModal();
         }
       },
       () => {
@@ -198,10 +203,9 @@ const ChatRoom = ({ chatRoomId, currentUserId, otherUserId, chatRoomInfo }) => {
 
         setMessages((prev) => [...prev, transformedMessage]);
         
-        // 티켓 생성 문맥 감지 시 티켓 작성 모달 띄우기
+        // 티켓 생성 문맥 감지 시 확인 모달 띄우기
         if (newMessage.ticketTrigger) {
-          // TODO: 티켓 작성 모달 띄우기
-          alert("티켓 생성 문맥이 감지되었습니다. 티켓 작성 모달을 띄워주세요.");
+          openConfirmModal();
         }
       } catch (err) {
         console.error("메시지 전송 실패:", err);
@@ -252,6 +256,20 @@ const ChatRoom = ({ chatRoomId, currentUserId, otherUserId, chatRoomInfo }) => {
     setSelectedUsers([]);
     setSearchKeyword("");
     setSelectedDepartment("");
+  };
+
+  // ✅ 티켓 작성 모달 열기/닫기
+  const openTicketModal = () => setIsTicketModalOpen(true);
+  const closeTicketModal = () => setIsTicketModalOpen(false);
+
+  // ✅ 티켓 생성 확인 모달 열기/닫기
+  const openConfirmModal = () => setIsConfirmModalOpen(true);
+  const closeConfirmModal = () => setIsConfirmModalOpen(false);
+
+  // ✅ 확인 모달에서 예를 눌렀을 때
+  const handleConfirmTicket = () => {
+    closeConfirmModal();
+    openTicketModal();
   };
 
   // ✅ 멤버 검색 (디바운싱)
@@ -546,6 +564,16 @@ const ChatRoom = ({ chatRoomId, currentUserId, otherUserId, chatRoomInfo }) => {
           onChangeGroupName={() => {}}
         />
       )}
+
+      {/* 티켓 생성 확인 모달 */}
+      <TicketConfirmModal
+        isOpen={isConfirmModalOpen}
+        onConfirm={handleConfirmTicket}
+        onCancel={closeConfirmModal}
+      />
+
+      {/* 티켓 작성 모달 */}
+      {isTicketModalOpen && <AIChatWidget onClose={closeTicketModal} />}
     </div>
   );
 };
