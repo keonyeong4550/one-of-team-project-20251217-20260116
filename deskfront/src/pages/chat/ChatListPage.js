@@ -18,13 +18,27 @@ const ChatListPage = () => {
 
   if (!currentUserId) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="text-gray-500">로그인이 필요합니다.</div>
+      <div className="chat-shell w-full bg-baseBg min-h-screen py-6 lg:py-8">
+        <div className="ui-container">
+          <div className="p-6 lg:p-8 min-h-[600px]">
+            <div className="bg-baseBg rounded-ui shadow-ui border border-baseBorder p-8 min-h-[600px] flex items-center justify-center">
+              <div className="text-baseMuted">로그인이 필요합니다.</div>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
 
-  return <ChatListComponent currentUserId={currentUserId} />;
+  return (
+    <div className="chat-shell w-full bg-baseBg min-h-screen py-6 lg:py-8">
+      <div className="ui-container">
+        <div className="p-6 lg:p-8 min-h-[600px]">
+          <ChatListComponent currentUserId={currentUserId} />
+        </div>
+      </div>
+    </div>
+  );
 };
 
 export default ChatListPage;
