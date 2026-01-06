@@ -20,11 +20,14 @@ public class TicketFile {
     @Id
     private String uuid; // UUID를 PK로 사용 (파일 저장명이 됨)
 
+    @Column(name = "file_name")
     private String fileName; // 실제 파일명 (예: 보고서.pdf)
+    @Column(name = "file_size")
     private Long fileSize;
     private int ord; // 저장 순서
 
     @CreatedDate
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
 
     private String writer; // 업로더

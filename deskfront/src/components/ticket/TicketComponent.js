@@ -119,6 +119,7 @@ const TicketComponent = () => {
   const closeTicketModal = () => {
     setIsModalOpen(false);
     setSelectedTno(null);
+    fetchData();
   };
 
   const handleDeleted = () => {

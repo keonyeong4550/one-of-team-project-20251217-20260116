@@ -37,6 +37,7 @@ public class Board {
     @Column(name = "reg_date", updatable = false)
     private LocalDateTime regDate;
 
+    @Column(name = "mod_date")
     private LocalDateTime modDate;
 
     @PrePersist

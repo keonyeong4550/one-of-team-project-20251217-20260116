@@ -1,11 +1,10 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-
 import { useSelector, useDispatch } from "react-redux";
 import { logout } from "../../slices/loginSlice";
 import CommonModal from "../common/CommonModal";
 import useCustomLogin from "../../hooks/useCustomLogin";
-import AIChatWidget from "./AIChatWidget";
+import AIChatWidget from "./AIChatWidget"; // [NEW] AI 위젯 임포트
 import useCustomPin from "../../hooks/useCustomPin";
 
 const BasicMenu = () => {
@@ -99,6 +98,9 @@ const BasicMenu = () => {
                 <Link to="/file/" className={getMenuClass("/file/")}>
                   파일함
                 </Link>
+                <Link to="/chat/" className={getMenuClass("/chat/")}>
+                  채팅
+                </Link>
               </>
                 {loginState.email && (
                 <>
@@ -132,15 +134,18 @@ const BasicMenu = () => {
               </Link>
             ) : (
               <div className="flex items-center space-x-3">
-                <div className="flex flex-col items-end hidden sm:block">
-                  <span className="text-xs text-gray-400">Welcome</span>
-                  <span className="text-sm font-bold text-gray-700">
+                {/* ✅ Welcome 및 닉네임 클릭 시 회원 수정 페이지 이동 */}
+                <Link to="/member/modify" className="flex flex-col items-end hidden sm:block hover:opacity-70 transition-opacity">
+                  <span className="text-xs text-gray-400 cursor-pointer">Welcome</span>
+                  <span className="text-sm font-bold text-gray-700 cursor-pointer">
                     {loginState.nickname}님
                   </span>
-                </div>
-                <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-gray-500 border border-gray-200">
+                </Link>
+
+                <Link to="/member/modify" className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-gray-500 border border-gray-200 hover:bg-gray-200 transition-colors">
                   👤
-                </div>
+                </Link>
+
                 <button
                   type="button"
                   onClick={handleClickLogout}

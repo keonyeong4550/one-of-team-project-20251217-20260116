@@ -2,6 +2,7 @@ package com.desk.security.filter;
 
 import com.google.gson.Gson;
 import com.desk.dto.MemberDTO;
+import com.desk.util.CustomJWTException;
 import com.desk.util.JWTUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -34,7 +35,7 @@ public class JWTCheckFilter extends OncePerRequestFilter{
         log.info("check uri......................."+path);
 
         // “로그인 안 한 사용자도 접근 가능한 API”는 JWT 체크 안 함
-        // api/member/ 경로의 호출은 체크하지 않음 
+        // api/member/ 경로의 호출은 체크하지 않음
         if(path.startsWith("/api/member/")) {
             return true;
         }
@@ -43,6 +44,12 @@ public class JWTCheckFilter extends OncePerRequestFilter{
         if (path.startsWith("/api/files/view/") || path.startsWith("/api/files/download/")) {
             return true;
         }
+
+        // WebSocket 핸드셰이크 경로는 체크하지 않음 (인증은 WebSocketSecurityConfig에서 처리)
+        if (path.startsWith("/ws/")) {
+            return true;
+        }
+
         // [추가] AI 관련 API는 필터 검사 하지 않음 (CORS 필터는 적용됨)
         if (path.startsWith("/api/ai/")) return true;
         return false;
@@ -54,6 +61,16 @@ public class JWTCheckFilter extends OncePerRequestFilter{
         log.info("------------------------JWTCheckFilter------------------");
         // 클라이언트에서 Authorization: Bearer <JWT>로 전달
         String authHeaderStr = request.getHeader("Authorization");
+
+        if (authHeaderStr == null || !authHeaderStr.startsWith("Bearer ")) {
+            log.error("JWT Check Error: Authorization header is missing or invalid");
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/json");
+            PrintWriter printWriter = response.getWriter();
+            printWriter.println(new Gson().toJson(Map.of("error", "UNAUTHORIZED")));
+            printWriter.close();
+            return;
+        }
 
         try {
             //Bearer accestoken... "Bearer " 접두사 제거
@@ -72,9 +89,10 @@ public class JWTCheckFilter extends OncePerRequestFilter{
             String department = (String) claims.get("department");
             Boolean approved = (Boolean) claims.get("approved");
             List<String> roleNames = (List<String>) claims.get("roleNames");
+            Boolean faceEnabled = (Boolean) claims.get("faceEnabled");
 
             // JWT에서 추출한 정보로 인증 객체(MemberDTO) 생성, UserDetails 역할
-            MemberDTO memberDTO = new MemberDTO(email, pw, nickname, social.booleanValue(), department, approved.booleanValue(), roleNames);
+            MemberDTO memberDTO = new MemberDTO(email, pw, nickname, social.booleanValue(), department, approved.booleanValue(), roleNames, faceEnabled);
 
             log.info("-----------------------------------");
             log.info(memberDTO);
@@ -86,10 +104,7 @@ public class JWTCheckFilter extends OncePerRequestFilter{
             // 지금 로그인한 사용자의 인증 정보(사용자 정보, 비밀번호, 권한 등)를 SecurityContext에 저장
             SecurityContextHolder.getContext().setAuthentication(authenticationToken);
 
-            filterChain.doFilter(request, response);
-
-        }catch(Exception e){ // 예외 처리 (JWT 검증 실패)
-
+        }catch(CustomJWTException e){ // 예외 처리 (JWT 검증 실패만 처리)
             log.error("JWT Check Error..............");
             log.error(e.getMessage());
 
@@ -100,8 +115,15 @@ public class JWTCheckFilter extends OncePerRequestFilter{
             PrintWriter printWriter = response.getWriter();
             printWriter.println(msg);
             printWriter.close();
+            return; // JWT 검증 실패 시 여기서 종료
 
+        }catch(Exception e){ // JWT 검증과 무관한 예외는 그대로 전파
+            // JWT 검증과 무관한 예외는 그대로 전파 (ServletException, IOException 등)
+            throw e;
         }
+
+        // JWT 검증 성공 시 필터 체인 계속 진행
+        filterChain.doFilter(request, response);
     }
 
 }

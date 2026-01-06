@@ -27,6 +27,7 @@ public class TicketPin {
     @JoinColumn(name = "ticket_tno")
     private Ticket ticket;
 
+    @Column(name = "pinned_at")
     private LocalDateTime pinnedAt;
 
     @PrePersist

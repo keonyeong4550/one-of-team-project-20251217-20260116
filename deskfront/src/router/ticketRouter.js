@@ -5,7 +5,7 @@ import { Navigate } from "react-router-dom";
 const Loading = <div>Loading....</div>;
 const TicketPage = lazy(() => import("../pages/ticket/TicketPage"));
 
-const todoRouter = () => {
+const ticketRouter = () => {
   return [
     {
       path: "list",
@@ -22,4 +22,4 @@ const todoRouter = () => {
   ];
 };
 
-export default todoRouter;
+export default ticketRouter;

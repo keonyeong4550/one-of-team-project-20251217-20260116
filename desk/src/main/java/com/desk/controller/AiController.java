@@ -1,7 +1,7 @@
 package com.desk.controller;
 
-import com.desk.dto.MeetingMinutesDto;
-import com.desk.service.OllamaService;
+import com.desk.dto.MeetingMinutesDTO;
+import com.desk.service.OllamaServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpHeaders;
@@ -18,18 +18,18 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class AiController {
 
-    private final OllamaService ollamaService;
+    private final OllamaServiceImpl ollamaService;
 
     // 1. 단순 텍스트 요약 요청
     @PostMapping(value = "/summary")
-    public ResponseEntity<MeetingMinutesDto> getReportSummary(
+    public ResponseEntity<MeetingMinutesDTO> getReportSummary(
             @RequestPart(value = "file", required = false) MultipartFile file,
             @RequestParam(value = "title", required = false) String title,
             @RequestParam(value = "content", required = false) String content,
             @RequestParam(value = "purpose", required = false) String purpose,
             @RequestParam(value = "requirement", required = false) String requirement
     ) {
-        MeetingMinutesDto result = ollamaService.getMeetingInfoFromAi(file, title, content, purpose, requirement);
+        MeetingMinutesDTO result = ollamaService.getMeetingInfoFromAi(file, title, content, purpose, requirement);
         return ResponseEntity.ok(result);
     }
 
@@ -43,7 +43,7 @@ public class AiController {
             @RequestParam(value = "requirement", required = false) String requirement
     ) {
         // 1. AI 요약 실행 (파일이 있으면 파일 내용도 포함해서 분석)
-        MeetingMinutesDto meetingData = ollamaService.getMeetingInfoFromAi(file, title, content, purpose, requirement);
+        MeetingMinutesDTO meetingData = ollamaService.getMeetingInfoFromAi(file, title, content, purpose, requirement);
 
         // 2. PDF 바이너리 생성
         byte[] pdfBytes = ollamaService.generatePdf(meetingData);
@@ -71,7 +71,7 @@ public class AiController {
     }
     // ✅ 3. 파란창 요약 데이터 그대로 PDF 생성
     @PostMapping("/summary-pdf")
-    public ResponseEntity<?> downloadSummaryPdf(@RequestBody MeetingMinutesDto summary) {
+    public ResponseEntity<?> downloadSummaryPdf(@RequestBody MeetingMinutesDTO summary) {
 
         byte[] pdfBytes = ollamaService.generatePdf(summary);
 

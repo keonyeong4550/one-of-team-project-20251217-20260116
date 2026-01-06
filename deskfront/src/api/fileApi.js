@@ -33,7 +33,7 @@ export const downloadFile = async (uuid, fileName) => {
         alert("파일 다운로드 중 오류가 발생했습니다.");
     }
 };
-// 기존 코드 하단에 추가
+
 export const deleteFile = async (uuid) => {
     const res = await jwtAxios.delete(`${host}/${uuid}`);
     return res.data;
