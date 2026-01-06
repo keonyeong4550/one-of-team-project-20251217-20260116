@@ -1,10 +1,20 @@
-import React from 'react';
+import { useEffect } from "react";
 import ChatListComponent from '../../components/chat/ChatListComponent';
 import useCustomLogin from '../../hooks/useCustomLogin';
+import { useNavigate } from "react-router-dom";
 
 const ChatListPage = () => {
   const { loginState } = useCustomLogin();
   const currentUserId = loginState?.email || '';
+  const navigate = useNavigate();
+
+ useEffect(() => {
+    if (!loginState.email) {
+      alert("로그인이 필요한 서비스입니다.");
+      navigate("/member/login", { replace: true });
+    }
+  }, [loginState.email, navigate]);
+
 
   if (!currentUserId) {
     return (

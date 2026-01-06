@@ -7,6 +7,7 @@ import { getRecentBoards } from "../api/boardApi";
 import useCustomPin from "../hooks/useCustomPin";
 import TicketDetailModal from "../components/ticket/TicketDetailModal";
 import { getGradeBadge } from "../util/ticketUtils";
+import AIChatWidget from "../components/menu/AIChatWidget";
 
 const MainPage = () => {
   const loginState = useSelector((state) => state.loginSlice);
@@ -20,8 +21,8 @@ const MainPage = () => {
 
   const [selectedTno, setSelectedTno] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isAIWidgetOpen, setIsAIWidgetOpen] = useState(false); // 요청서 모달 상태 추가
 
-  // 이메일 존재 여부로 로그인 확인
   const isLoggedIn = !!loginState.email;
   const email = loginState.email;
   const displayName = loginState.nickname || "사용자";
@@ -36,7 +37,6 @@ const MainPage = () => {
   };
 
   const fetchMainData = useCallback(() => {
-    // 1. 로그인이 되어 있지 않으면 모든 상태를 초기화하고 API를 호출하지 않음
     if (!isLoggedIn) {
       setRecentTasks([]);
       setRecentBoards([]);
@@ -45,26 +45,10 @@ const MainPage = () => {
       return;
     }
 
-    // 2. 로그인 상태일 때만 API 호출 (catch를 추가하여 에러 발생 시 콘솔 오류 방지)
-    getRecentBoards()
-      .then(data => setRecentBoards(data || []))
-      .catch(err => console.error("공지사항 로드 실패:", err));
-
-    getRecentReceivedTickets(email)
-      .then(data => setRecentTasks(data || []))
-      .catch(err => {
-        console.error("최근 업무 로드 실패:", err);
-        setRecentTasks([]);
-      });
-
-    getReceivedTickets(email, { size: 1 }, { read: false })
-      .then(res => setUnreadCount(res.totalCount || 0))
-      .catch(() => setUnreadCount(0));
-
-    getSentTickets(email, { size: 1 }, { state: 'IN_PROGRESS' })
-      .then(res => setPendingSentCount(res.totalCount || 0))
-      .catch(() => setPendingSentCount(0));
-
+    getRecentBoards().then(data => setRecentBoards(data || [])).catch(() => {});
+    getRecentReceivedTickets(email).then(data => setRecentTasks(data || [])).catch(() => setRecentTasks([]));
+    getReceivedTickets(email, { size: 1 }, { read: false }).then(res => setUnreadCount(res.totalCount || 0)).catch(() => setUnreadCount(0));
+    getSentTickets(email, { size: 1 }, { state: 'IN_PROGRESS' }).then(res => setPendingSentCount(res.totalCount || 0)).catch(() => setPendingSentCount(0));
   }, [isLoggedIn, email]);
 
   useEffect(() => {
@@ -91,23 +75,24 @@ const MainPage = () => {
 
   return (
     <BasicLayout>
-      <div className="max-w-7xl mx-auto px-6 py-12 space-y-8 bg-gray-50 min-h-[calc(100vh-80px)]">
+      {/* 요청서 모달 추가 */}
+      {isAIWidgetOpen && <AIChatWidget onClose={() => setIsAIWidgetOpen(false)} />}
 
+      <div className="max-w-7xl mx-auto px-6 py-12 space-y-8 bg-gray-50 min-h-[calc(100vh-80px)]">
         <section className="bg-indigo-600 rounded-2xl p-10 text-white shadow-lg relative overflow-hidden">
           <div className="relative z-10">
             <h1 className="text-3xl font-bold mb-3">
               {isLoggedIn ? `안녕하세요, ${displayName}님` : "로그인이 필요합니다"}
             </h1>
-            <p className="text-lg text-indigo-100 opacity-90">AI 챗봇과 대화하며 업무 요청을 정확하게 전달하세요.</p>
+            <p className="text-lg text-indigo-100 opacity-90">AI 챗봇과 대화하며 업무 요청서를 자동으로 생성하세요.</p>
             <button
-              onClick={() => isLoggedIn ? navigate("/tickets/add") : navigate("/member/login")}
+              onClick={() => isLoggedIn ? setIsAIWidgetOpen(true) : navigate("/member/login")}
               className="mt-6 bg-white text-indigo-600 px-7 py-2.5 rounded-xl font-bold hover:bg-indigo-50 transition-all shadow-md active:scale-95"
             >
-              {isLoggedIn ? "+ 새 업무 요청 만들기" : "로그인 하러 가기"}
+              {isLoggedIn ? "+ 새 업무 요청서 만들기" : "로그인 하러 가기"}
             </button>
           </div>
           <div className="absolute top-[-20%] right-[-5%] w-72 h-72 bg-indigo-500 rounded-full opacity-20"></div>
-          <div className="absolute bottom-[-15%] left-[30%] w-32 h-32 bg-indigo-400 rounded-full opacity-10"></div>
         </section>
 
         <section className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -135,7 +120,6 @@ const MainPage = () => {
         </section>
 
         <section className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* 최근 받은 업무 */}
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 flex flex-col min-h-[440px]">
             <h2 className="text-xl font-bold text-gray-800 mb-8 border-l-4 border-indigo-500 pl-4">최근 받은 업무</h2>
             <div className="flex-grow space-y-4">
@@ -145,11 +129,7 @@ const MainPage = () => {
                 </div>
               ) : recentTasks.length > 0 ? (
                 recentTasks.map((task) => (
-                  <div
-                    key={task.tno}
-                    onClick={() => openDetail(task.tno)}
-                    className="p-5 border border-gray-50 rounded-xl hover:bg-gray-50 transition-all cursor-pointer flex justify-between items-center"
-                  >
+                  <div key={task.tno} onClick={() => openDetail(task.tno)} className="p-5 border border-gray-50 rounded-xl hover:bg-gray-50 transition-all cursor-pointer flex justify-between items-center">
                     <div className="truncate pr-4">
                       <h3 className="text-lg font-semibold text-gray-800 truncate">{task.title}</h3>
                       <div className="flex text-sm text-gray-500 space-x-3 mt-1.5">
@@ -164,15 +144,11 @@ const MainPage = () => {
                 <p className="text-center py-14 text-gray-400 font-medium">받은 업무가 없습니다.</p>
               )}
             </div>
-            <button
-              onClick={() => moveToListWithFilter('RECEIVED')}
-              className="mt-8 text-center text-sm text-gray-500 hover:text-indigo-600 font-bold border-t pt-5"
-            >
+            <button onClick={() => moveToListWithFilter('RECEIVED')} className="mt-8 text-center text-sm text-gray-500 hover:text-indigo-600 font-bold border-t pt-5">
               전체 업무 보기
             </button>
           </div>
 
-          {/* 최근 공지사항 */}
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 flex flex-col min-h-[440px]">
             <h2 className="text-xl font-bold text-gray-800 mb-8 border-l-4 border-indigo-500 pl-4">최근 공지</h2>
             <div className="flex-grow space-y-4">
@@ -182,11 +158,7 @@ const MainPage = () => {
                 </div>
               ) : recentBoards.length > 0 ? (
                 recentBoards.map((board) => (
-                  <div
-                    key={board.bno}
-                    onClick={() => navigate(`/board/read/${board.bno}`)}
-                    className="flex justify-between items-center p-5 border-b border-gray-50 last:border-0 hover:bg-gray-50 rounded-xl transition-all cursor-pointer"
-                  >
+                  <div key={board.bno} onClick={() => navigate(`/board/read/${board.bno}`)} className="flex justify-between items-center p-5 border-b border-gray-50 last:border-0 hover:bg-gray-50 rounded-xl transition-all cursor-pointer">
                     <div className="truncate pr-4">
                       <h3 className="text-base font-medium text-gray-700 truncate">{board.title}</h3>
                       <span className="text-sm text-gray-400">{board.regDate}</span>
@@ -200,10 +172,7 @@ const MainPage = () => {
                 <p className="text-center py-14 text-gray-400 font-medium">등록된 공지가 없습니다.</p>
               )}
             </div>
-            <button
-              onClick={() => navigate("/board/list")}
-              className="mt-8 text-center text-sm text-gray-500 hover:text-indigo-600 font-bold border-t pt-5"
-            >
+            <button onClick={() => navigate("/board/list")} className="mt-8 text-center text-sm text-gray-500 hover:text-indigo-600 font-bold border-t pt-5">
               전체 공지 보기
             </button>
           </div>
