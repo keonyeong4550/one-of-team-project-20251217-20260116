@@ -1,5 +1,6 @@
 package com.desk.service;
 
+import com.desk.config.OllamaConfig;
 import com.desk.dto.MeetingMinutesDTO;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -46,14 +47,8 @@ import java.time.format.DateTimeFormatter;
 @Log4j2
 public class OllamaServiceImpl implements OllamaService {
 
-    @Value("${ai.ollama.url}")
-    private String ollamaUrl;
-    @Value("${ai.ollama.model-name}")
-    private String modelName;
-    @Value("${ai.ollama.api-key}")
-    private String apiKey;
-
     private final ObjectMapper objectMapper;
+    private final OllamaConfig ollamaConfig;
 
     // [수정] 파일과 텍스트를 받아서 AI에게 요청
     @Override
@@ -86,7 +81,7 @@ public class OllamaServiceImpl implements OllamaService {
             throw new RuntimeException("분석할 내용이 없습니다. 내용을 입력하거나 파일을 첨부해주세요.");
         }
 
-        String url = ollamaUrl + "/api/generate";
+        String url = ollamaConfig.getBaseUrl() + "/api/generate";
 
         // -----------------------------------------------------------
         // [프롬프트 수정] 티켓 필드(제목, 목적, 상세, 마감일) 매핑 강화
@@ -158,7 +153,7 @@ public class OllamaServiceImpl implements OllamaService {
     // [헬퍼] AI 호출 공통 로직
     private MeetingMinutesDTO callOllamaApi(String url, String prompt) {
         Map<String, Object> requestBody = new HashMap<>();
-        requestBody.put("model", modelName);
+        requestBody.put("model", ollamaConfig.getModelName());
         requestBody.put("prompt", prompt);
         requestBody.put("format", "json");
         requestBody.put("stream", false);
@@ -170,6 +165,7 @@ public class OllamaServiceImpl implements OllamaService {
             RestTemplate restTemplate = new RestTemplate();
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
+            String apiKey = ollamaConfig.getApiKey();  // ollamaConfig에서 가져오기
             if (apiKey != null && !apiKey.isEmpty()) {
                 headers.set("x-api-key", apiKey);
             }

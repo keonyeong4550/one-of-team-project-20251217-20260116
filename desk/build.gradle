@@ -103,20 +103,7 @@ tasks.named('test') {
     useJUnitPlatform()
 }
 
-/**
- * QueryDSL Q클래스 생성 설정
- * src/main/generated 폴더에 생성되도록 설정
- */
-def querydslDir = "src/main/generated"
-
-tasks.withType(JavaCompile).configureEach {
-    options.getGeneratedSourceOutputDirectory().set(file(querydslDir))
-}
-
-sourceSets {
-    main.java.srcDirs += [ querydslDir ]
-}
-
-clean {
-    delete file(querydslDir)
+// QueryDSL Q클래스 생성 경로 지정 (선택사항)
+tasks.named('compileJava') {
+    options.annotationProcessorGeneratedSourcesDirectory = file("$buildDir/generated/sources/annotationProcessor/java/main")
 }
