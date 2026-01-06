@@ -417,7 +417,7 @@ const ChatRoom = ({ chatRoomId, currentUserId, otherUserId, chatRoomInfo }) => {
 
       {/* Messages (scroll) */}
       <div className="flex-1 overflow-hidden max-w-7xl mx-auto w-full px-8 pb-8">
-        <div className="h-full bg-white rounded-[2.5rem] overflow-hidden shadow-[0_25px_60px_rgba(0,0,0,0.05)] border border-gray-100 flex flex-col">
+        <div className="h-full bg-white rounded-[2.5rem] overflow-hidden shadow-[0_25px_60px_rgba(0,0,0,0.12)] border border-gray-100 flex flex-col">
           <div className="shrink-0 bg-[#1a1f2c] px-10 py-5 flex justify-between items-center border-b border-gray-800">
             <h2 className="text-white font-black italic tracking-widest text-xs uppercase opacity-80">
               Chat Messages
@@ -498,7 +498,7 @@ const ChatRoom = ({ chatRoomId, currentUserId, otherUserId, chatRoomInfo }) => {
 
       {/* Input */}
       <div className="shrink-0 max-w-7xl mx-auto w-full px-8 pb-8">
-        <div className="bg-white px-10 py-8 flex gap-4 border-t border-gray-100/60 rounded-b-[2.5rem]">
+        <div className="px-10 py-8 flex gap-4 border-t border-gray-100 rounded-b-[2.5rem]">
           <input
             type="text"
             value={inputMessage}
@@ -524,7 +524,7 @@ const ChatRoom = ({ chatRoomId, currentUserId, otherUserId, chatRoomInfo }) => {
           <button
             onClick={handleSendMessage}
             disabled={!connected || !inputMessage.trim()}
-            className="bg-[#111827] text-white px-10 py-3.5 rounded-2xl font-black text-xs uppercase tracking-[0.2em] hover:bg-blue-600 hover:-translate-y-1 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:hover:translate-y-0 transition-all duration-300 shadow-xl shadow-gray-200"
+            className="bg-gray-900 text-white px-10 py-3.5 rounded-2xl font-black text-xs uppercase tracking-[0.2em] hover:bg-blue-600 hover:-translate-y-1 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:hover:translate-y-0 transition-all duration-300 shadow-xl shadow-gray-200"
           >
             전송
           </button>
