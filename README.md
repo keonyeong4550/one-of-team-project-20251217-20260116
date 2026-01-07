@@ -74,6 +74,7 @@
 # 5. DB 설계서 중 담당한 파일업로드 테이블정의서
 <img width="3508" height="2481" alt="Image" src="https://github.com/user-attachments/assets/2539ac85-ca60-4118-b2de-cf3aa6eeee81" />
 
+---
 # 6. 맡은 분야 
 (AI 음성기반 업무 자동화 비서 (Smart Voice Secretary)
 <img width="2282" height="1652" alt="Image" src="https://github.com/user-attachments/assets/6c005e7e-c87b-46c8-88be-6fa9dc136941" />
@@ -144,5 +145,27 @@ String displayName = memberRepository.findById(email)
 휴먼 에러 제거: 담당자 이메일 오타나 마감일 누락 방지.
 데이터 자산화: 구두로 끝날 수 있는 회의 내용을 정형 데이터(DB)와 문서(PDF)로 자동 자산화.
 ```
-
-
+---
+# 7. 개발내역서(Code 중심)
+<img width="2481" height="3508" alt="Image" src="https://github.com/user-attachments/assets/fe6bb18e-d8f1-4225-ba5f-fd816585612e" />
+<img width="2481" height="3508" alt="Image" src="https://github.com/user-attachments/assets/e64aad57-39dd-45a1-9ce3-aa517de3fa65" />
+<img width="2481" height="3508" alt="Image" src="https://github.com/user-attachments/assets/fa7d3912-dca2-4fb3-b329-6157b3120e38" />
+<img width="2481" height="3508" alt="Image" src="https://github.com/user-attachments/assets/ff648825-86ac-4aeb-a637-ce10d1698a05" />
+<img width="2481" height="3508" alt="Image" src="https://github.com/user-attachments/assets/7bce33ce-96de-4c4c-b0ea-09f9751e812b" />
+<img width="2481" height="3508" alt="Image" src="https://github.com/user-attachments/assets/aae78d3d-ef6a-4f84-8bb9-74dcf3d317ce" />
+<img width="2481" height="3508" alt="Image" src="https://github.com/user-attachments/assets/233e9ac8-b30a-46f6-965a-2a49fbe21795" />
+<img width="2481" height="3508" alt="Image" src="https://github.com/user-attachments/assets/2c0d12f0-5b86-4431-8b1b-87a3f64d9526" />
+<img width="2481" height="3508" alt="Image" src="https://github.com/user-attachments/assets/19d4a9ed-5b17-4886-ab67-92353c448232" />
+<img width="2481" height="3508" alt="Image" src="https://github.com/user-attachments/assets/14dc52fe-2657-4538-8815-1498b2e52a4e" />
+<img width="2481" height="3508" alt="Image" src="https://github.com/user-attachments/assets/434d183f-7f04-4f4f-848f-7a34ac2a72ea" />
+<img width="2481" height="3508" alt="Image" src="https://github.com/user-attachments/assets/dea2a11a-3c56-42be-8b34-e69b1ee5341a" />
+<img width="2481" height="3508" alt="Image" src="https://github.com/user-attachments/assets/cc3833c6-5e5d-42b0-a470-1948940baf1f" />
+<img width="2481" height="3508" alt="Image" src="https://github.com/user-attachments/assets/a9fca9b6-6a50-4ede-9794-4dd1a2b6074d" />
+<img width="2481" height="3508" alt="Image" src="https://github.com/user-attachments/assets/570e3556-1172-441c-a62e-e71096064f95" />
+<img width="2481" height="3508" alt="Image" src="https://github.com/user-attachments/assets/acb3f360-2f00-4c85-8bb0-e80fe71ba869" />
+<img width="2481" height="3508" alt="Image" src="https://github.com/user-attachments/assets/b2113d33-0d41-4dae-b192-86aee9e5e404" />
+<img width="2481" height="3508" alt="Image" src="https://github.com/user-attachments/assets/bb5c6da1-ac3c-411c-baf1-e1e035b06165" />
+<img width="2481" height="3508" alt="Image" src="https://github.com/user-attachments/assets/ec6a7362-cc62-4a49-98e5-3bed0f1d8d00" />
+<img width="2481" height="3508" alt="Image" src="https://github.com/user-attachments/assets/f9b7db3e-7871-4344-88e5-dfa51994621e" />
+<img width="2481" height="3508" alt="Image" src="https://github.com/user-attachments/assets/a7881c8b-6b30-4478-be72-87695deb3dd3" />
+<img width="2481" height="3508" alt="Image" src="https://github.com/user-attachments/assets/72226e67-3c5d-4266-90eb-06ac972b6016" />
