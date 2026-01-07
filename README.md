@@ -1,0 +1,171 @@
+# one-of-team-project-20251217-20260116
+---
+# 1. 프로젝트 개발 방식 정리
+## 가. AS-IS (현재 개발 방식 분석)
+### 개발 방식 요약
+- **하이브리드 방식** (애자일 + 워터폴 혼합)
+- 마감일 고정형 프로젝트 + 내부 진행은 반복적 개선 구조
+### 특징
+- 요구사항이 회의마다 조정됨 (기능/범위 유동적)
+- 역할 분담 후 병렬 개발 진행
+- 기능 완성 기준은 비교적 단순함 ("에러 없이 동작")
+- 일정 말미에 기능을 수렴하는 구조
+### 문제점
+- 명확한 스프린트 단위 목표 부재
+- 우선순위가 회의 중 변경되어 개발 집중도 저하 가능
+- 테스트/완료 기준(DoD)이 모호함
+## 나. TO-BE (추천 개발 방식)
+### 추천 모델
+- **Fixed Deadline 기반 Agile (Sprint 중심 개발)**
+### 전체 구조
+- 총 개발 기간을 **1주 단위 스프린트**로 분할
+- 각 스프린트마다:
+  - 목표 기능 명확화
+  - 데모 가능한 결과물 산출
+  - 간단한 회고 진행
+## 다. Sprint 운영안 (예시)
+### Sprint 구성 (1주)
+- **Day 1**: 백로그 정리 / 우선순위 결정
+- **Day 2~4**: 개발
+- **Day 5**: 통합 테스트 + 데모
+### 산출물
+- 동작 가능한 기능
+- 간단한 기능 설명 문서
+## 라. 역할 분담 기준 (유지)
+| 영역        | 담당 내용            |
+|:----|:----:|
+| 게시판       | CRUD, 권한 처리   |
+| 파일 처리     | 업로드/다운로드    |
+| AI           | 프롬프트, API 연동 |
+## 마. Definition of Done (DoD) 제안
+- 기능 단위로 에러 없이 동작
+- 더미 데이터 기준 시나리오 통과
+- 다른 파트와 연동 가능
+## 바. 기대 효과
+- 일정 압박 감소
+- 개발 집중도 향상
+- 발표/제출 시 리스크 최소화
+---
+# 2. 개발문서표준체계
+<img width="2481" height="3508" alt="Image" src="https://github.com/user-attachments/assets/2c8a2722-9250-47c7-bc65-0d134ddcd4c4" />
+
+---
+# 3. 화면 설계서(2025-12-18-2025-12-19)
+![Image](https://github.com/user-attachments/assets/eb4fae46-588f-4da9-b18f-affd90d2162f)
+![Image](https://github.com/user-attachments/assets/e782d016-937f-4629-95c6-f5cbfe2d781a)
+![Image](https://github.com/user-attachments/assets/e7a9fe70-defc-4033-b1ca-5f50b9538a6e)
+![Image](https://github.com/user-attachments/assets/70960869-f69b-4359-9893-27bf89af07fc)
+![Image](https://github.com/user-attachments/assets/b469c1ea-6bbf-416d-8f59-885bf6e4cf88)
+![Image](https://github.com/user-attachments/assets/b18bbf78-5172-47e4-8378-9b703cb1cd24)
+![Image](https://github.com/user-attachments/assets/55193bdc-c2c5-49cb-a30e-7a5b29e51952)
+![Image](https://github.com/user-attachments/assets/41c9d5c9-709c-4b2a-91c7-71b7307d7a97)
+![Image](https://github.com/user-attachments/assets/b22cb9da-6dd1-4dc4-957f-ae59531722cf)
+![Image](https://github.com/user-attachments/assets/237182bf-d6ad-4146-af78-274098f4cd76)
+![Image](https://github.com/user-attachments/assets/10aeb16e-351a-4fcc-84d5-90388b2edec9)
+![Image](https://github.com/user-attachments/assets/5e11b203-a7d6-4c67-96f2-21ce33f3a8c0)
+![Image](https://github.com/user-attachments/assets/f04ef54a-649d-4b63-a578-7136a429deff)
+![Image](https://github.com/user-attachments/assets/89a59d65-0461-4f31-88eb-46bce84578e8)
+![Image](https://github.com/user-attachments/assets/5c54247c-7ea6-4619-bfcf-25d82f447239)
+---
+# 4. 시스템 아키텍쳐(2025-12-18)
+<img width="1040" height="720" alt="Image" src="https://github.com/user-attachments/assets/8fdbd6dc-7f0e-40f2-ba95-669d6b53cb87" />
+
+---
+# 5. DB 설계서 중 담당한 파일업로드 테이블정의서
+<img width="3508" height="2481" alt="Image" src="https://github.com/user-attachments/assets/2539ac85-ca60-4118-b2de-cf3aa6eeee81" />
+
+---
+# 6. 맡은 분야 
+(AI 음성기반 업무 자동화 비서 (Smart Voice Secretary)
+<img width="2282" height="1652" alt="Image" src="https://github.com/user-attachments/assets/6c005e7e-c87b-46c8-88be-6fa9dc136941" />
+```
+회의 녹음 파일 하나만 던지면? STT 변환 →→ 요약 →→ 담당자 배정 
+→→ PDF 보고서 생성까지 단 1초의 클릭도 없이 끝내는 Zero-Touch 업무 자동화 솔루션
+```
+🛠️ Tech Stack & Architecture
+<img width="1282" height="299" alt="Image" src="https://github.com/user-attachments/assets/9e6f16f2-fa6f-40ae-9f1b-34447f8498e9" />
+
+🔥 핵심 기능 하이라이트 (Key Features)
+<br>
+1️⃣ Zero-Touch Workflow (음성 →→ 티켓 자동화)
+```
+"사용자는 파일을 올리기만 하세요. 나머지는 AI가 알아서 합니다."
+🎙️ 자동 STT & 분석: 음성 파일(MP3) 업로드 즉시 백그라운드에서 텍스트로 변환 및 분석 시작.
+⚡ 실시간 UX: 분석된 텍스트를 채팅창에 지저분하게 보여주지 않고, 내부적으로 처리하여 깔끔한 UX 제공.
+📅 스마트 마감일: AI가 날짜를 놓치더라도 **비즈니스 로직(생성일 +7일)**이 강제로 개입하여 안전한 마감일 자동 설정.
+```
+2️⃣ 지능형 데이터 매핑 (Intelligent Entity Mapping) 🧠
+```
+"시스템은 이메일로 일하고, 사람은 이름으로 봅니다."
+이 프로젝트의 백엔드 기술적 킬링 포인트입니다.
+AI 분석 단계: 음성에서 "유리", "기훈" 같은 자연어 이름 추출.
+DB 매핑 (Inbound): 백엔드(OllamaService)가 이름을 감지, DB를 조회하여 시스템이 인식 가능한 **이메일(user1@desk.com)**로 자동 변환 →→ 티켓 전송 성공!
+PDF 생성 (Outbound): 사람이 보는 보고서에는 이메일 대신 다시 "김유리 대리" 처럼 실명으로 역변환하여 출력.
+```
+3️⃣ High-Precision Prompt Engineering 💬
+```
+단순한 요약이 아닙니다. JSON 구조화를 강제하여 데이터를 DB에 꽂아 넣습니다.
+Role-Playing: "당신은 전문 회의 기록관입니다." 페르소나 부여.
+Structured Output: Title(제목), Overview(목적), Details(상세), Conclusion(결론) 등 DB 스키마와 1:1 매핑되는 JSON 추출.
+Defensive Logic: 내용이 없으면 "내용 없음"으로 채우도록 방어 로직 구축.
+```
+4️⃣ Dynamic PDF Generator (iText 7) 📄
+```
+AI가 분석한 데이터를 바탕으로 실시간으로 문서를 렌더링합니다.
+자동 레이아웃: 텍스트 양에 따라 셀 높이가 조절되는 반응형 표(Table) 설계.
+한글 폰트 완벽 지원: malgun.ttf 임베딩을 통해 깨짐 없는 고품질 PDF 생성.
+자동 첨부: 생성된 PDF를 다운로드할 필요 없이, 티켓의 첨부파일로 즉시 꽂아버리는 자동화 로직 구현.
+```
+5️⃣ Enterprise-Grade Stability 🛡️
+```
+대용량 처리: multipart 설정을 튜닝하여 50MB 이상의 고음질 회의 녹음도 끊김 없이 처리.
+Fail-Safe: STT나 AI 서버가 응답하지 않을 경우를 대비한 헬스 체크 및 예외 처리 로직 완비.
+```
+💻 Code Glance (Core Logic)
+DB 조회 후 닉네임 ↔ 이메일 자동 변환 로직
+```
+Java
+// ✅ AI가 추출한 '이름'을 시스템용 '이메일'로 변환 (티켓 전송용)
+private void convertNamesToEmails(MeetingMinutesDTO dto) {
+    for (String name : dto.getAttendees()) {
+        memberRepository.findByNickname(name)
+            .ifPresent(member -> convertedEmails.add(member.getEmail()));
+    }
+}
+
+// ✅ 시스템용 '이메일'을 보고서용 '이름'으로 역변환 (PDF 출력용)
+// generatePdf 메서드 내부
+String displayName = memberRepository.findById(email)
+        .map(Member::getNickname)
+        .orElse(email); // 못 찾으면 이메일 그대로
+```
+🎯 Impact (기대 효과)
+```
+업무 시간 단축: 30분 걸리던 회의록 정리 및 티켓 생성을 30초로 단축.
+휴먼 에러 제거: 담당자 이메일 오타나 마감일 누락 방지.
+데이터 자산화: 구두로 끝날 수 있는 회의 내용을 정형 데이터(DB)와 문서(PDF)로 자동 자산화.
+```
+---
+# 7. 개발내역서(Code 중심)
+<img width="2481" height="3508" alt="Image" src="https://github.com/user-attachments/assets/fe6bb18e-d8f1-4225-ba5f-fd816585612e" />
+<img width="2481" height="3508" alt="Image" src="https://github.com/user-attachments/assets/e64aad57-39dd-45a1-9ce3-aa517de3fa65" />
+<img width="2481" height="3508" alt="Image" src="https://github.com/user-attachments/assets/fa7d3912-dca2-4fb3-b329-6157b3120e38" />
+<img width="2481" height="3508" alt="Image" src="https://github.com/user-attachments/assets/ff648825-86ac-4aeb-a637-ce10d1698a05" />
+<img width="2481" height="3508" alt="Image" src="https://github.com/user-attachments/assets/7bce33ce-96de-4c4c-b0ea-09f9751e812b" />
+<img width="2481" height="3508" alt="Image" src="https://github.com/user-attachments/assets/aae78d3d-ef6a-4f84-8bb9-74dcf3d317ce" />
+<img width="2481" height="3508" alt="Image" src="https://github.com/user-attachments/assets/233e9ac8-b30a-46f6-965a-2a49fbe21795" />
+<img width="2481" height="3508" alt="Image" src="https://github.com/user-attachments/assets/2c0d12f0-5b86-4431-8b1b-87a3f64d9526" />
+<img width="2481" height="3508" alt="Image" src="https://github.com/user-attachments/assets/19d4a9ed-5b17-4886-ab67-92353c448232" />
+<img width="2481" height="3508" alt="Image" src="https://github.com/user-attachments/assets/14dc52fe-2657-4538-8815-1498b2e52a4e" />
+<img width="2481" height="3508" alt="Image" src="https://github.com/user-attachments/assets/434d183f-7f04-4f4f-848f-7a34ac2a72ea" />
+<img width="2481" height="3508" alt="Image" src="https://github.com/user-attachments/assets/dea2a11a-3c56-42be-8b34-e69b1ee5341a" />
+<img width="2481" height="3508" alt="Image" src="https://github.com/user-attachments/assets/cc3833c6-5e5d-42b0-a470-1948940baf1f" />
+<img width="2481" height="3508" alt="Image" src="https://github.com/user-attachments/assets/a9fca9b6-6a50-4ede-9794-4dd1a2b6074d" />
+<img width="2481" height="3508" alt="Image" src="https://github.com/user-attachments/assets/570e3556-1172-441c-a62e-e71096064f95" />
+<img width="2481" height="3508" alt="Image" src="https://github.com/user-attachments/assets/acb3f360-2f00-4c85-8bb0-e80fe71ba869" />
+<img width="2481" height="3508" alt="Image" src="https://github.com/user-attachments/assets/b2113d33-0d41-4dae-b192-86aee9e5e404" />
+<img width="2481" height="3508" alt="Image" src="https://github.com/user-attachments/assets/bb5c6da1-ac3c-411c-baf1-e1e035b06165" />
+<img width="2481" height="3508" alt="Image" src="https://github.com/user-attachments/assets/ec6a7362-cc62-4a49-98e5-3bed0f1d8d00" />
+<img width="2481" height="3508" alt="Image" src="https://github.com/user-attachments/assets/f9b7db3e-7871-4344-88e5-dfa51994621e" />
+<img width="2481" height="3508" alt="Image" src="https://github.com/user-attachments/assets/a7881c8b-6b30-4478-be72-87695deb3dd3" />
+<img width="2481" height="3508" alt="Image" src="https://github.com/user-attachments/assets/72226e67-3c5d-4266-90eb-06ac972b6016" />
