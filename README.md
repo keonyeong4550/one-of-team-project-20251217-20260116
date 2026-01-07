@@ -73,3 +73,74 @@
 ---
 # 5. DB 설계서 중 담당한 파일업로드 테이블정의서
 <img width="3508" height="2481" alt="Image" src="https://github.com/user-attachments/assets/2539ac85-ca60-4118-b2de-cf3aa6eeee81" />
+
+# 6. 맡은 분야 (AI 음성기반 업무 자동화 비서 (Smart Voice Secretary)
+```
+회의 녹음 파일 하나만 던지면? STT 변환 →→ 요약 →→ 담당자 배정 
+→→ PDF 보고서 생성까지 단 1초의 클릭도 없이 끝내는 Zero-Touch 업무 자동화 솔루션
+```
+🛠️ Tech Stack & Architecture
+<img width="1282" height="299" alt="Image" src="https://github.com/user-attachments/assets/9e6f16f2-fa6f-40ae-9f1b-34447f8498e9" />
+
+🔥 핵심 기능 하이라이트 (Key Features)
+<br>
+1️⃣ Zero-Touch Workflow (음성 →→ 티켓 자동화)
+```
+"사용자는 파일을 올리기만 하세요. 나머지는 AI가 알아서 합니다."
+🎙️ 자동 STT & 분석: 음성 파일(MP3) 업로드 즉시 백그라운드에서 텍스트로 변환 및 분석 시작.
+⚡ 실시간 UX: 분석된 텍스트를 채팅창에 지저분하게 보여주지 않고, 내부적으로 처리하여 깔끔한 UX 제공.
+📅 스마트 마감일: AI가 날짜를 놓치더라도 **비즈니스 로직(생성일 +7일)**이 강제로 개입하여 안전한 마감일 자동 설정.
+```
+2️⃣ 지능형 데이터 매핑 (Intelligent Entity Mapping) 🧠
+```
+"시스템은 이메일로 일하고, 사람은 이름으로 봅니다."
+이 프로젝트의 백엔드 기술적 킬링 포인트입니다.
+AI 분석 단계: 음성에서 "유리", "기훈" 같은 자연어 이름 추출.
+DB 매핑 (Inbound): 백엔드(OllamaService)가 이름을 감지, DB를 조회하여 시스템이 인식 가능한 **이메일(user1@desk.com)**로 자동 변환 →→ 티켓 전송 성공!
+PDF 생성 (Outbound): 사람이 보는 보고서에는 이메일 대신 다시 "김유리 대리" 처럼 실명으로 역변환하여 출력.
+```
+3️⃣ High-Precision Prompt Engineering 💬
+```
+단순한 요약이 아닙니다. JSON 구조화를 강제하여 데이터를 DB에 꽂아 넣습니다.
+Role-Playing: "당신은 전문 회의 기록관입니다." 페르소나 부여.
+Structured Output: Title(제목), Overview(목적), Details(상세), Conclusion(결론) 등 DB 스키마와 1:1 매핑되는 JSON 추출.
+Defensive Logic: 내용이 없으면 "내용 없음"으로 채우도록 방어 로직 구축.
+```
+4️⃣ Dynamic PDF Generator (iText 7) 📄
+```
+AI가 분석한 데이터를 바탕으로 실시간으로 문서를 렌더링합니다.
+자동 레이아웃: 텍스트 양에 따라 셀 높이가 조절되는 반응형 표(Table) 설계.
+한글 폰트 완벽 지원: malgun.ttf 임베딩을 통해 깨짐 없는 고품질 PDF 생성.
+자동 첨부: 생성된 PDF를 다운로드할 필요 없이, 티켓의 첨부파일로 즉시 꽂아버리는 자동화 로직 구현.
+```
+5️⃣ Enterprise-Grade Stability 🛡️
+```
+대용량 처리: multipart 설정을 튜닝하여 50MB 이상의 고음질 회의 녹음도 끊김 없이 처리.
+Fail-Safe: STT나 AI 서버가 응답하지 않을 경우를 대비한 헬스 체크 및 예외 처리 로직 완비.
+```
+💻 Code Glance (Core Logic)
+DB 조회 후 닉네임 ↔ 이메일 자동 변환 로직
+```
+Java
+// ✅ AI가 추출한 '이름'을 시스템용 '이메일'로 변환 (티켓 전송용)
+private void convertNamesToEmails(MeetingMinutesDTO dto) {
+    for (String name : dto.getAttendees()) {
+        memberRepository.findByNickname(name)
+            .ifPresent(member -> convertedEmails.add(member.getEmail()));
+    }
+}
+
+// ✅ 시스템용 '이메일'을 보고서용 '이름'으로 역변환 (PDF 출력용)
+// generatePdf 메서드 내부
+String displayName = memberRepository.findById(email)
+        .map(Member::getNickname)
+        .orElse(email); // 못 찾으면 이메일 그대로
+```
+🎯 Impact (기대 효과)
+```
+업무 시간 단축: 30분 걸리던 회의록 정리 및 티켓 생성을 30초로 단축.
+휴먼 에러 제거: 담당자 이메일 오타나 마감일 누락 방지.
+데이터 자산화: 구두로 끝날 수 있는 회의 내용을 정형 데이터(DB)와 문서(PDF)로 자동 자산화.
+```
+
+
