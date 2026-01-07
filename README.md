@@ -74,7 +74,9 @@
 # 5. DB 설계서 중 담당한 파일업로드 테이블정의서
 <img width="3508" height="2481" alt="Image" src="https://github.com/user-attachments/assets/2539ac85-ca60-4118-b2de-cf3aa6eeee81" />
 
-# 6. 맡은 분야 (AI 음성기반 업무 자동화 비서 (Smart Voice Secretary)
+# 6. 맡은 분야 
+(AI 음성기반 업무 자동화 비서 (Smart Voice Secretary)
+<img width="2282" height="1652" alt="Image" src="https://github.com/user-attachments/assets/6c005e7e-c87b-46c8-88be-6fa9dc136941" />
 ```
 회의 녹음 파일 하나만 던지면? STT 변환 →→ 요약 →→ 담당자 배정 
 →→ PDF 보고서 생성까지 단 1초의 클릭도 없이 끝내는 Zero-Touch 업무 자동화 솔루션
