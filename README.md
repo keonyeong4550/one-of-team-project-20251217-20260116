@@ -170,6 +170,17 @@ String displayName = memberRepository.findById(email)
 <img width="2481" height="3508" alt="Image" src="https://github.com/user-attachments/assets/a7881c8b-6b30-4478-be72-87695deb3dd3" />
 <img width="2481" height="3508" alt="Image" src="https://github.com/user-attachments/assets/72226e67-3c5d-4266-90eb-06ac972b6016" />
 
+
+
+
 ---
 # 8. 구동 메인 화면 (끝)
 <img width="844" height="876" alt="Image" src="https://github.com/user-attachments/assets/91532d24-7fde-45b8-a4b0-93daf9343efb" />
+
+
+---
+
+## 🎥 [유튜브 시연영상 링크 바로보기](https://youtu.be/B4vM6StBNSk)
+
+## 📋 [PDF 보기 링크 바로 보기](https://nbviewer.org/github/keonyeong4550/one-of-team-project-20251217-20260116/blob/main/2조_김민식,한정연,박태오,박건영,오인준.pdf)
+
